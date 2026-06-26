@@ -1,0 +1,2 @@
+# Auth module: login/forgot/reset forms, session helpers, profile bootstrap.
+# Follows the canonical module structure documented in features/README.md.

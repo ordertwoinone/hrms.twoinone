@@ -1,0 +1,15 @@
+-- Supabase seed data, applied after migrations on `supabase db reset`.
+--
+-- STRUCTURE ONLY: left intentionally empty until the schema lands. It will
+-- seed reference data such as system roles and their permission grants
+-- (mirroring src/config/roles.ts), default leave types, and a demo company.
+--
+-- Example (uncomment once the tables exist):
+--
+-- insert into public.roles (key, name) values
+--   ('super_admin', 'Super Admin'),
+--   ('hr_admin',    'HR Admin'),
+--   ('hr_manager',  'HR Manager'),
+--   ('manager',     'Manager'),
+--   ('employee',    'Employee')
+-- on conflict (key) do nothing;
