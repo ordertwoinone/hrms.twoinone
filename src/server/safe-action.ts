@@ -10,6 +10,18 @@ import { assertPermission, AuthorizationError } from "@/lib/auth/guards";
 import { logger } from "@/lib/logger";
 
 /**
+ * Throw inside a handler to return a specific, user-facing error message
+ * (instead of the generic fallback). Use for known, safe-to-surface failures
+ * like "A user with this email already exists."
+ */
+export class ActionError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "ActionError";
+  }
+}
+
+/**
  * `createAction` is the standard wrapper for every Server Action in the app. It
  * centralizes: auth, permission checks, Zod input validation, and error → typed
  * `ActionResult` mapping. Feature actions stay thin and focus on domain logic.
@@ -62,7 +74,7 @@ export function createAction<TInput, TOutput>(
       const data = await config.handler({ input, user });
       return { success: true, data };
     } catch (error) {
-      if (error instanceof AuthorizationError) {
+      if (error instanceof AuthorizationError || error instanceof ActionError) {
         return { success: false, error: error.message };
       }
       logger.error("Server action failed", {

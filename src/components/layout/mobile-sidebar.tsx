@@ -2,50 +2,39 @@
 
 import * as React from "react";
 import { usePathname } from "next/navigation";
-import { Menu } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-import {
-  Sheet,
-  SheetContent,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useSidebar } from "@/components/providers/sidebar-provider";
 import { SidebarBrand } from "./sidebar-brand";
 import { SidebarNav } from "./sidebar-nav";
+import { SidebarUser } from "./sidebar-user";
 
 /**
- * Mobile/tablet navigation. A hamburger button in the header opens the same
- * sidebar content inside a slide-over sheet. The sheet auto-closes on route
- * change so navigating feels native.
+ * Mobile/tablet navigation. Controlled by the sidebar provider's `openMobile`
+ * state (the header's menu button toggles it). Renders the same brand, nav, and
+ * user blocks as the desktop rail, and auto-closes on route change.
  */
 export function MobileSidebar() {
-  const [open, setOpen] = React.useState(false);
+  const { openMobile, setOpenMobile } = useSidebar();
   const pathname = usePathname();
 
   React.useEffect(() => {
-    setOpen(false);
-  }, [pathname]);
+    setOpenMobile(false);
+  }, [pathname, setOpenMobile]);
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="lg:hidden"
-          aria-label="Open navigation menu"
-        >
-          <Menu className="h-5 w-5" />
-        </Button>
-      </SheetTrigger>
-      <SheetContent side="left" className="w-72 bg-sidebar p-0">
+    <Sheet open={openMobile} onOpenChange={setOpenMobile}>
+      <SheetContent
+        side="left"
+        className="flex w-sidebar flex-col bg-sidebar p-0"
+      >
         <SheetTitle className="sr-only">Navigation</SheetTitle>
         <SidebarBrand />
-        <ScrollArea className="h-[calc(100vh-4rem)]">
-          <SidebarNav onNavigate={() => setOpen(false)} />
+        <ScrollArea className="flex-1">
+          <SidebarNav onNavigate={() => setOpenMobile(false)} />
         </ScrollArea>
+        <SidebarUser />
       </SheetContent>
     </Sheet>
   );

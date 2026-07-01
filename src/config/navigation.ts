@@ -2,12 +2,16 @@ import {
   LayoutDashboard,
   Users,
   Building2,
+  Network,
+  IdCard,
+  BriefcaseBusiness,
   CalendarClock,
   CalendarDays,
   Wallet,
   FileText,
   BarChart3,
   Settings,
+  UsersRound,
   type LucideIcon,
 } from "lucide-react";
 
@@ -26,6 +30,9 @@ export interface NavItem {
   href: string;
   icon: LucideIcon;
   permission: Permission | null;
+  /** Optional notification count rendered as a badge on the nav item. */
+  badge?: number;
+  /** Optional sub-navigation rendered as an expandable group. */
   children?: Omit<NavItem, "icon" | "children">[];
 }
 
@@ -61,10 +68,28 @@ export const navigation: NavGroup[] = [
         permission: PERMISSIONS.EMPLOYEE_VIEW,
       },
       {
+        title: "Branches",
+        href: ROUTES.branches,
+        icon: Network,
+        permission: PERMISSIONS.BRANCH_VIEW,
+      },
+      {
         title: "Departments",
         href: ROUTES.departments,
         icon: Building2,
         permission: PERMISSIONS.DEPARTMENT_VIEW,
+      },
+      {
+        title: "Designations",
+        href: ROUTES.designations,
+        icon: IdCard,
+        permission: PERMISSIONS.DESIGNATION_VIEW,
+      },
+      {
+        title: "Employment Types",
+        href: ROUTES.employmentTypes,
+        icon: BriefcaseBusiness,
+        permission: PERMISSIONS.EMPLOYMENT_TYPE_VIEW,
       },
     ],
   },
@@ -82,6 +107,7 @@ export const navigation: NavGroup[] = [
         href: ROUTES.leave,
         icon: CalendarDays,
         permission: PERMISSIONS.LEAVE_VIEW,
+        badge: 3,
       },
     ],
   },
@@ -116,6 +142,18 @@ export const navigation: NavGroup[] = [
   {
     label: "System",
     items: [
+      {
+        title: "Company",
+        href: ROUTES.company,
+        icon: Building2,
+        permission: PERMISSIONS.COMPANY_VIEW,
+      },
+      {
+        title: "Users",
+        href: ROUTES.users,
+        icon: UsersRound,
+        permission: PERMISSIONS.USER_VIEW,
+      },
       {
         title: "Settings",
         href: ROUTES.settings,

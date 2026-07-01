@@ -15,6 +15,13 @@ const serverSchema = z.object({
   NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1),
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
   NEXT_PUBLIC_SITE_URL: z.string().url().default("http://localhost:3000"),
+  // First Super Admin bootstrap (optional). When all three are set and the
+  // system has no users yet, the first Super Admin is created automatically.
+  // Empty strings are tolerated (treated as "not set") so a blank value in
+  // .env.local never crashes env validation.
+  SUPER_ADMIN_EMAIL: z.union([z.string().email(), z.literal("")]).optional(),
+  SUPER_ADMIN_PASSWORD: z.union([z.string().min(8), z.literal("")]).optional(),
+  SUPER_ADMIN_NAME: z.string().optional(),
 });
 
 const clientSchema = z.object({
@@ -35,6 +42,9 @@ function parseServerEnv() {
     NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
     NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
+    SUPER_ADMIN_EMAIL: process.env.SUPER_ADMIN_EMAIL,
+    SUPER_ADMIN_PASSWORD: process.env.SUPER_ADMIN_PASSWORD,
+    SUPER_ADMIN_NAME: process.env.SUPER_ADMIN_NAME,
   });
 
   if (!parsed.success) {

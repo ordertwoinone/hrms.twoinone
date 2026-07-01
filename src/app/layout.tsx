@@ -1,15 +1,11 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { GeistSans } from "geist/font/sans";
+import { GeistMono } from "geist/font/mono";
 
+import { cn } from "@/lib/utils";
 import { siteConfig } from "@/config/site";
 import { AppProviders } from "@/components/providers";
 import "./globals.css";
-
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-sans",
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   title: {
@@ -32,17 +28,24 @@ export const viewport: Viewport = {
 };
 
 /**
- * Root layout. Sets up the html document, the Inter font variable, and the
- * global provider stack (theme, query, tooltips, toasts). `suppressHydration
- * Warning` is required by next-themes because the theme class is applied on the
- * client before hydration.
+ * Root layout. Sets up the html document, the Geist Sans/Mono font variables,
+ * and the global provider stack (theme, query, tooltips, toasts).
+ * `suppressHydrationWarning` is required by next-themes because the theme class
+ * is applied on the client before hydration.
  */
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.variable} font-sans`}>
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={cn(GeistSans.variable, GeistMono.variable)}
+    >
+      {/* suppressHydrationWarning: some browser extensions inject attributes
+          (e.g. `cz-shortcut-listen`) onto <body> before hydration. This only
+          suppresses attribute diffs one level deep, not real app mismatches. */}
+      <body className="min-h-screen font-sans" suppressHydrationWarning>
         <AppProviders>{children}</AppProviders>
       </body>
     </html>

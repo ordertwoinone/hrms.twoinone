@@ -1,14 +1,11 @@
 import type { Metadata } from "next";
 
+import { ResetPasswordForm } from "@/features/auth/components/reset-password-form";
+
 export const metadata: Metadata = {
   title: "Set new password",
 };
 
-/**
- * Reset-password route — STRUCTURE ONLY. Reached from the email recovery link
- * (Supabase establishes a recovery session via the auth callback). The set-new-
- * password form ships with the auth feature module later.
- */
 export default function ResetPasswordPage() {
   return (
     <div className="space-y-6">
@@ -20,10 +17,7 @@ export default function ResetPasswordPage() {
           Choose a strong password for your account.
         </p>
       </div>
-      <div className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">
-        Reset-password form placeholder — implemented in{" "}
-        <code className="font-mono">features/auth</code>.
-      </div>
+      <ResetPasswordForm />
     </div>
   );
 }

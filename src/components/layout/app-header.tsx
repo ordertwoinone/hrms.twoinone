@@ -1,24 +1,47 @@
+import { Separator } from "@/components/ui/separator";
 import { Breadcrumbs } from "./breadcrumbs";
 import { MobileSidebar } from "./mobile-sidebar";
-import { NavUser } from "./nav-user";
+import { CommandMenu } from "./command-menu";
+import { HeaderSearch } from "./header-search";
+import { Notifications } from "./notifications";
+import { CompanySwitcher } from "./company-switcher";
+import { QuickActions } from "./quick-actions";
+import { SidebarToggle } from "./sidebar-toggle";
 import { ThemeToggle } from "./theme-toggle";
+import { NavUser } from "./nav-user";
 
 /**
- * Sticky top header for the dashboard shell. Contains (left → right): the
- * mobile nav trigger, breadcrumbs, the theme toggle, and the user menu. Stays
- * pinned while the content area scrolls beneath it.
+ * Sticky top header (72px) for the dashboard shell.
+ *
+ * Left:  sidebar toggle · company switcher · breadcrumbs (current page).
+ * Right: search (⌘K) · quick action · notifications · theme · profile.
+ *
+ * The mobile sheet and command palette are mounted here (they portal to the
+ * body) so the whole navigation surface lives with the header.
  */
 export function AppHeader() {
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b bg-background px-4 sm:px-6">
-      <MobileSidebar />
-      <div className="flex-1">
+    <header className="sticky top-0 z-30 flex h-header items-center gap-2 border-b bg-card/80 px-3 backdrop-blur-md sm:px-4">
+      <SidebarToggle />
+      <CompanySwitcher />
+      <Separator orientation="vertical" className="mx-1 hidden h-6 md:block" />
+      <div className="hidden min-w-0 flex-1 md:block">
         <Breadcrumbs />
       </div>
-      <div className="flex items-center gap-1">
+      <div className="flex flex-1 items-center justify-end gap-1.5 md:flex-none">
+        <HeaderSearch />
+        <QuickActions />
+        <Notifications unread={3} />
         <ThemeToggle />
+        <Separator
+          orientation="vertical"
+          className="mx-1 hidden h-6 sm:block"
+        />
         <NavUser />
       </div>
+
+      <MobileSidebar />
+      <CommandMenu />
     </header>
   );
 }

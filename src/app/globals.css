@@ -3,107 +3,112 @@
 @tailwind utilities;
 
 /**
- * Design tokens for the premium enterprise theme.
+ * Design tokens — premium enterprise HR design system.
  *
- * - Light mode = white content area with a slate accent (the default look).
- * - The `--sidebar-*` tokens stay dark in BOTH themes so the signature dark
- *   navigation rail is preserved against the white content area.
- * - All colors are HSL channel triplets consumed via `hsl(var(--token))` in
- *   tailwind.config.ts.
+ * A calm, productivity-focused palette built around a teal accent (#0F766E).
+ * All values are HSL channel triplets consumed via `hsl(var(--token))` (with
+ * `<alpha-value>` support) in tailwind.config.ts, so opacity modifiers like
+ * `bg-primary/90` work and theming lives in exactly one place.
+ *
+ * Surface layering (light): body #F5F6F8 → content #FAFAFA → cards/sidebar #FFF.
  */
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222 47% 11%;
+    /* Surfaces */
+    --background: 220 18% 97%; /* #F5F6F8 — app/body */
+    --canvas: 0 0% 98%; /* #FAFAFA — scrollable content area */
+    --foreground: 221 39% 11%; /* #111827 — primary text */
 
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card-foreground: 221 39% 11%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
+    --popover-foreground: 221 39% 11%;
 
-    --primary: 222 47% 31%;
-    --primary-foreground: 210 40% 98%;
+    /* Brand */
+    --primary: 175 77% 26%; /* #0F766E teal-700 */
+    --primary-hover: 176 69% 22%; /* #115E59 teal-800 */
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 222 47% 11%;
+    /* Neutrals */
+    --secondary: 220 14% 96%; /* #F3F4F6 */
+    --secondary-foreground: 217 19% 27%; /* #374151 */
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 9% 46%; /* #6B7280 secondary text */
+    --subtle-foreground: 218 11% 65%; /* #9CA3AF muted text */
+    --accent: 220 14% 96%;
+    --accent-foreground: 221 39% 11%;
 
-    --muted: 210 40% 96%;
-    --muted-foreground: 215 16% 47%;
-
-    --accent: 210 40% 96%;
-    --accent-foreground: 222 47% 11%;
-
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 210 40% 98%;
-
-    --success: 142 71% 45%;
+    /* Status */
+    --destructive: 0 72% 51%; /* #DC2626 */
+    --destructive-foreground: 0 0% 100%;
+    --success: 142 76% 36%; /* #16A34A */
     --success-foreground: 0 0% 100%;
+    --warning: 38 92% 50%; /* #F59E0B */
+    --warning-foreground: 221 39% 11%;
+    --info: 175 77% 26%;
+    --info-foreground: 0 0% 100%;
 
-    --warning: 38 92% 50%;
-    --warning-foreground: 222 47% 11%;
+    /* Lines & focus */
+    --border: 220 13% 91%; /* #E5E7EB */
+    --input: 220 13% 91%;
+    --ring: 175 77% 26%;
 
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 222 47% 31%;
+    --radius: 0.75rem; /* 12px */
 
-    --radius: 0.5rem;
-
-    /* Dark sidebar (premium navigation rail) */
-    --sidebar-background: 222 47% 11%;
-    --sidebar-foreground: 210 40% 96%;
-    --sidebar-primary: 217 91% 60%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 217 33% 20%;
-    --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 217 33% 20%;
-    --sidebar-ring: 217 91% 60%;
+    /* Sidebar (white, with a teal-tinted active state) */
+    --sidebar-background: 0 0% 100%; /* #FFFFFF */
+    --sidebar-foreground: 220 9% 46%; /* #6B7280 */
+    --sidebar-accent: 166 76% 97%; /* #F0FDFA teal-50 — active bg */
+    --sidebar-accent-foreground: 175 77% 26%; /* teal-700 — active text/icon */
+    --sidebar-muted: 220 14% 96%; /* hover bg */
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 175 77% 26%;
   }
 
   .dark {
-    --background: 222 47% 8%;
-    --foreground: 210 40% 98%;
+    --background: 223 24% 6%; /* #0B0D12 */
+    --canvas: 218 19% 8%;
+    --foreground: 210 20% 98%; /* #F9FAFB */
 
-    --card: 222 47% 11%;
-    --card-foreground: 210 40% 98%;
+    --card: 218 17% 9%; /* #14171C */
+    --card-foreground: 210 20% 98%;
 
-    --popover: 222 47% 11%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 218 17% 9%;
+    --popover-foreground: 210 20% 98%;
 
-    --primary: 217 91% 60%;
-    --primary-foreground: 222 47% 11%;
+    --primary: 173 80% 40%; /* #14B8A6 teal-500 — brighter for dark */
+    --primary-hover: 175 84% 32%; /* #0D9488 teal-600 */
+    --primary-foreground: 179 84% 10%; /* near-black teal — AA contrast */
 
-    --secondary: 217 33% 17%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 220 18% 16%; /* #222731 */
+    --secondary-foreground: 210 20% 98%;
+    --muted: 220 18% 16%;
+    --muted-foreground: 215 13% 65%; /* #9AA4B2 */
+    --subtle-foreground: 215 13% 50%;
+    --accent: 220 18% 16%;
+    --accent-foreground: 210 20% 98%;
 
-    --muted: 217 33% 17%;
-    --muted-foreground: 215 20% 65%;
-
-    --accent: 217 33% 17%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 63% 41%;
-    --destructive-foreground: 210 40% 98%;
-
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
     --success: 142 71% 45%;
     --success-foreground: 0 0% 100%;
-
     --warning: 38 92% 50%;
-    --warning-foreground: 222 47% 11%;
+    --warning-foreground: 221 39% 11%;
+    --info: 173 80% 40%;
+    --info-foreground: 179 84% 10%;
 
-    --border: 217 33% 20%;
-    --input: 217 33% 20%;
-    --ring: 217 91% 60%;
+    --border: 220 18% 16%; /* #222731 */
+    --input: 220 18% 16%;
+    --ring: 173 80% 40%;
 
-    /* Sidebar stays dark; nudge contrast slightly for dark mode */
-    --sidebar-background: 222 47% 9%;
-    --sidebar-foreground: 210 40% 96%;
-    --sidebar-primary: 217 91% 60%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 217 33% 17%;
-    --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 217 33% 17%;
-    --sidebar-ring: 217 91% 60%;
+    --sidebar-background: 218 21% 7%; /* #0F1217 */
+    --sidebar-foreground: 215 13% 65%;
+    --sidebar-accent: 179 60% 12%; /* deep teal — active bg */
+    --sidebar-accent-foreground: 172 66% 50%; /* #2DD4BF teal-400 */
+    --sidebar-muted: 220 18% 14%;
+    --sidebar-border: 220 18% 16%;
+    --sidebar-ring: 173 80% 40%;
   }
 }
 
@@ -111,10 +116,49 @@
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground antialiased;
     font-feature-settings:
       "rlig" 1,
-      "calt" 1;
+      "calt" 1,
+      "ss01" 1,
+      "cv01" 1;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Accessible, consistent focus ring everywhere. */
+  :focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+
+  /* Premium, unobtrusive scrollbars. */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--border)) transparent;
+  }
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--border));
+    border-radius: 9999px;
+    border: 3px solid transparent;
+    background-clip: content-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: hsl(var(--subtle-foreground));
+    background-clip: content-box;
+  }
+}
+
+@layer utilities {
+  /* Subtle teal selection. */
+  ::selection {
+    background-color: hsl(var(--primary) / 0.18);
   }
 }

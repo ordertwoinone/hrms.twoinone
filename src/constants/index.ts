@@ -20,6 +20,7 @@ export const STORAGE_BUCKETS = {
   avatars: "avatars",
   documents: "documents",
   payslips: "payslips",
+  company: "company",
 } as const;
 
 /** Default UAE locale settings. */

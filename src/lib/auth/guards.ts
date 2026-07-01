@@ -23,7 +23,7 @@ export async function requirePermission(
   const required = Array.isArray(permission) ? permission : [permission];
 
   if (!hasAnyPermission(user.permissions, required)) {
-    redirect(ROUTES.dashboard);
+    redirect(ROUTES.unauthorized);
   }
   return user;
 }
@@ -34,7 +34,7 @@ export async function requireAllPermissions(
 ): Promise<AuthUser> {
   const user = await requireAuth();
   if (!hasAllPermissions(user.permissions, permissions)) {
-    redirect(ROUTES.dashboard);
+    redirect(ROUTES.unauthorized);
   }
   return user;
 }

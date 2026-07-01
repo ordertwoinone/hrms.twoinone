@@ -1,10 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { ChevronDown, LogOut, Settings, User } from "lucide-react";
+import { LogOut, Settings, User } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,42 +13,38 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ROUTES } from "@/constants/routes";
-import { ROLE_LABELS } from "@/config/roles";
 import { getInitials } from "@/utils/format";
 import { useAuth } from "@/components/providers/auth-provider";
 
 /**
- * Authenticated-user menu in the header. Shows avatar + name, and exposes
- * profile, settings, and sign-out. Reads the user from the auth context.
+ * Compact profile menu for the header (avatar trigger). The full profile block
+ * with name and role lives in the sidebar footer; this is the quick-access
+ * counterpart for the top bar.
  */
 export function NavUser() {
   const { user, signOut } = useAuth();
-
   if (!user) return null;
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="h-auto gap-2 px-2 py-1.5">
-          <Avatar className="h-8 w-8">
+        <button
+          type="button"
+          aria-label="Open profile menu"
+          className="rounded-full outline-none ring-offset-background transition focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        >
+          <Avatar className="size-9">
             <AvatarImage
               src={user.avatarUrl ?? undefined}
               alt={user.fullName}
             />
-            <AvatarFallback>{getInitials(user.fullName)}</AvatarFallback>
+            <AvatarFallback className="bg-primary/10 text-primary">
+              {getInitials(user.fullName)}
+            </AvatarFallback>
           </Avatar>
-          <div className="hidden flex-col items-start text-left sm:flex">
-            <span className="text-sm font-medium leading-none">
-              {user.fullName}
-            </span>
-            <span className="text-xs text-muted-foreground">
-              {ROLE_LABELS[user.role]}
-            </span>
-          </div>
-          <ChevronDown className="hidden h-4 w-4 text-muted-foreground sm:block" />
-        </Button>
+        </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56">
+      <DropdownMenuContent align="end" className="w-56" sideOffset={8}>
         <DropdownMenuLabel className="flex flex-col">
           <span>{user.fullName}</span>
           <span className="text-xs font-normal text-muted-foreground">
@@ -59,13 +54,13 @@ export function NavUser() {
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
           <Link href={ROUTES.profile}>
-            <User className="h-4 w-4" />
+            <User className="size-4" />
             Profile
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
           <Link href={ROUTES.settings}>
-            <Settings className="h-4 w-4" />
+            <Settings className="size-4" />
             Settings
           </Link>
         </DropdownMenuItem>
@@ -77,7 +72,7 @@ export function NavUser() {
           }}
           className="text-destructive focus:text-destructive"
         >
-          <LogOut className="h-4 w-4" />
+          <LogOut className="size-4" />
           Sign out
         </DropdownMenuItem>
       </DropdownMenuContent>

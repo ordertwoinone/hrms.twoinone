@@ -1,29 +1,36 @@
 import Link from "next/link";
-import { Building2 } from "lucide-react";
+import { Hexagon } from "lucide-react";
 
+import { cn } from "@/lib/utils";
 import { siteConfig } from "@/config/site";
 import { ROUTES } from "@/constants/routes";
 
 /**
- * Brand lockup shown at the top of the sidebar. Links back to the dashboard.
+ * Brand lockup at the top of the sidebar. Collapses to just the logo mark when
+ * the rail is collapsed.
  */
-export function SidebarBrand() {
+export function SidebarBrand({ collapsed = false }: { collapsed?: boolean }) {
   return (
     <Link
       href={ROUTES.dashboard}
-      className="flex h-16 items-center gap-3 border-b border-sidebar-border px-6"
+      className={cn(
+        "flex h-header items-center gap-2.5 border-b border-sidebar-border px-4",
+        collapsed && "justify-center px-0",
+      )}
     >
-      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-        <Building2 className="h-5 w-5" />
+      <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+        <Hexagon className="size-5" strokeWidth={2.25} />
       </div>
-      <div className="flex flex-col leading-tight">
-        <span className="text-sm font-semibold text-sidebar-foreground">
-          {siteConfig.name}
-        </span>
-        <span className="text-xs text-sidebar-foreground/50">
-          HR Management
-        </span>
-      </div>
+      {!collapsed && (
+        <div className="flex min-w-0 flex-col leading-tight">
+          <span className="truncate text-sm font-semibold text-foreground">
+            {siteConfig.name}
+          </span>
+          <span className="truncate text-xs text-muted-foreground">
+            HR Management
+          </span>
+        </div>
+      )}
     </Link>
   );
 }

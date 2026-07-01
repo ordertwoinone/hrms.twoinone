@@ -5,17 +5,19 @@ import { redirect } from "next/navigation";
 
 import type { AuthUser } from "@/types/auth";
 import { ROUTES } from "@/constants/routes";
-import { ROLES, type Role } from "@/config/roles";
+import { ALL_PERMISSIONS, type Permission } from "@/constants/permissions";
+import { ROLES, isRole, type Role } from "@/config/roles";
 import { createClient } from "@/lib/supabase/server";
 import { getPermissionsForRole } from "@/lib/auth/rbac";
 
 /**
  * Server-side session helpers. `getCurrentUser` is wrapped in React `cache` so
- * multiple Server Components in one render share a single Supabase round-trip.
+ * multiple Server Components in one render share a single resolution.
  *
- * NOTE: the profile/role lookup below is a placeholder. Once the `profiles`
- * table exists, replace the inline defaults with a real query that joins the
- * user's role and (optionally) their employee record.
+ * Authorization is database-backed: the user's profile (with its role) and the
+ * effective permission set (role grants + per-user overrides) are read under
+ * Row Level Security. A soft-deleted or inactive profile resolves to `null`,
+ * effectively logging the user out of the app.
  */
 export const getCurrentUser = cache(async (): Promise<AuthUser | null> => {
   const supabase = await createClient();
@@ -26,20 +28,54 @@ export const getCurrentUser = cache(async (): Promise<AuthUser | null> => {
 
   if (!user) return null;
 
-  // TODO(profiles): replace with a real `profiles` join once the schema lands.
-  const role: Role =
-    (user.app_metadata?.role as Role | undefined) ?? ROLES.EMPLOYEE;
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select(
+      "id, email, full_name, avatar_url, status, role_id, role:roles(key)",
+    )
+    .eq("id", user.id)
+    .is("deleted_at", null)
+    .maybeSingle();
+
+  if (!profile || profile.status !== "active") return null;
+
+  const roleKey = profile.role?.key;
+  const role: Role = roleKey && isRole(roleKey) ? roleKey : ROLES.EMPLOYEE;
+
+  // Effective permissions = role grants ± per-user overrides (DB-authoritative).
+  const [{ data: rolePerms }, { data: overrides }] = await Promise.all([
+    supabase
+      .from("role_permissions")
+      .select("permission:permissions(key)")
+      .eq("role_id", profile.role_id),
+    supabase
+      .from("user_permissions")
+      .select("granted, permission:permissions(key)")
+      .eq("user_id", profile.id),
+  ]);
+
+  const effective = new Set<string>();
+  for (const row of rolePerms ?? []) {
+    if (row.permission?.key) effective.add(row.permission.key);
+  }
+  for (const row of overrides ?? []) {
+    const key = row.permission?.key;
+    if (!key) continue;
+    if (row.granted) effective.add(key);
+    else effective.delete(key);
+  }
+
+  const permissions = [...effective].filter((key): key is Permission =>
+    (ALL_PERMISSIONS as readonly string[]).includes(key),
+  );
 
   return {
-    id: user.id,
-    email: user.email ?? "",
-    fullName:
-      (user.user_metadata?.full_name as string | undefined) ??
-      user.email ??
-      "User",
-    avatarUrl: (user.user_metadata?.avatar_url as string | undefined) ?? null,
+    id: profile.id,
+    email: profile.email,
+    fullName: profile.full_name,
+    avatarUrl: profile.avatar_url,
     role,
-    permissions: getPermissionsForRole(role),
+    permissions: permissions.length ? permissions : getPermissionsForRole(role),
     employeeId: null,
     departmentId: null,
   };
@@ -47,7 +83,8 @@ export const getCurrentUser = cache(async (): Promise<AuthUser | null> => {
 
 /**
  * Require an authenticated user in a Server Component / Action. Redirects to
- * login when there is no session. Returns the user so callers stay terse.
+ * login when there is no active session/profile. Returns the user so callers
+ * stay terse.
  */
 export async function requireAuth(): Promise<AuthUser> {
   const user = await getCurrentUser();

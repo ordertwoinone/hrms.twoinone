@@ -1,17 +1,24 @@
 import type { Metadata } from "next";
 
+import { LoginForm } from "@/features/auth/components/login-form";
+import { ensureSuperAdminBootstrap } from "@/lib/auth/bootstrap";
+
 export const metadata: Metadata = {
   title: "Sign in",
 };
 
 /**
- * Login route — STRUCTURE ONLY.
- *
- * The real form belongs to the auth feature module
- * (`src/features/auth/components/login-form.tsx`) and will be built later. This
- * page just wires the route into the auth layout so the shell is navigable.
+ * Login page. Runs the first-run Super Admin bootstrap (no-op once any user
+ * exists), then renders the secure login form. There is no public sign-up.
  */
-export default function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ redirectTo?: string }>;
+}) {
+  await ensureSuperAdminBootstrap();
+  const { redirectTo } = await searchParams;
+
   return (
     <div className="space-y-6">
       <div className="space-y-2">
@@ -20,10 +27,7 @@ export default function LoginPage() {
           Sign in to your account to continue.
         </p>
       </div>
-      <div className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">
-        Login form placeholder — implemented in{" "}
-        <code className="font-mono">features/auth</code>.
-      </div>
+      <LoginForm redirectTo={redirectTo} />
     </div>
   );
 }

@@ -5,28 +5,66 @@ import {
 } from "@/constants/permissions";
 
 /**
- * The fixed set of system roles. These are seeded into the database and act as
- * named bundles of permissions. Per-tenant custom roles can extend this model
- * later, but these defaults cover the typical UAE HR org chart.
+ * System roles. These mirror the `roles` table seeded in the database and act
+ * as named bundles of permissions. The DB (RLS + `role_permissions`) is the
+ * source of truth for authorization at runtime; this TypeScript mirror exists
+ * for typing, labels, seeding, and building selects.
  */
 export const ROLES = {
   SUPER_ADMIN: "super_admin",
-  HR_ADMIN: "hr_admin",
+  ADMIN: "admin",
   HR_MANAGER: "hr_manager",
-  MANAGER: "manager",
+  HR_EXECUTIVE: "hr_executive",
+  FINANCE: "finance",
+  DEPARTMENT_MANAGER: "department_manager",
   EMPLOYEE: "employee",
 } as const;
 
 export type Role = (typeof ROLES)[keyof typeof ROLES];
 
+/** Ordered list of roles (highest privilege first) for selects/tables. */
+export const ROLE_ORDER: readonly Role[] = [
+  ROLES.SUPER_ADMIN,
+  ROLES.ADMIN,
+  ROLES.HR_MANAGER,
+  ROLES.HR_EXECUTIVE,
+  ROLES.FINANCE,
+  ROLES.DEPARTMENT_MANAGER,
+  ROLES.EMPLOYEE,
+];
+
+/** Human-readable labels for UI (badges, dropdowns, settings). */
+export const ROLE_LABELS: Record<Role, string> = {
+  [ROLES.SUPER_ADMIN]: "Super Admin",
+  [ROLES.ADMIN]: "Admin",
+  [ROLES.HR_MANAGER]: "HR Manager",
+  [ROLES.HR_EXECUTIVE]: "HR Executive",
+  [ROLES.FINANCE]: "Finance",
+  [ROLES.DEPARTMENT_MANAGER]: "Department Manager",
+  [ROLES.EMPLOYEE]: "Employee",
+};
+
 /**
- * Default permission grants per role. The single source of truth for what each
- * role can do; mirrored into the database seed and enforced by RLS policies.
+ * Default permission grants per role. Mirrors the `role_permissions` seed and
+ * is used as a client-side fallback. The database remains authoritative.
  */
 export const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
   [ROLES.SUPER_ADMIN]: ALL_PERMISSIONS,
 
-  [ROLES.HR_ADMIN]: [
+  [ROLES.ADMIN]: [
+    PERMISSIONS.COMPANY_VIEW,
+    PERMISSIONS.DESIGNATION_VIEW,
+    PERMISSIONS.DESIGNATION_MANAGE,
+    PERMISSIONS.EMPLOYMENT_TYPE_VIEW,
+    PERMISSIONS.EMPLOYMENT_TYPE_MANAGE,
+    PERMISSIONS.BRANCH_VIEW,
+    PERMISSIONS.BRANCH_CREATE,
+    PERMISSIONS.BRANCH_UPDATE,
+    PERMISSIONS.BRANCH_DELETE,
+    PERMISSIONS.ROLE_VIEW,
+    PERMISSIONS.AUDIT_VIEW,
+    PERMISSIONS.SETTINGS_VIEW,
+    PERMISSIONS.SETTINGS_MANAGE,
     PERMISSIONS.EMPLOYEE_VIEW,
     PERMISSIONS.EMPLOYEE_CREATE,
     PERMISSIONS.EMPLOYEE_UPDATE,
@@ -42,13 +80,37 @@ export const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
     PERMISSIONS.DOCUMENT_VIEW,
     PERMISSIONS.DOCUMENT_MANAGE,
     PERMISSIONS.REPORT_VIEW,
-    PERMISSIONS.SETTINGS_VIEW,
-    PERMISSIONS.SETTINGS_MANAGE,
-    PERMISSIONS.AUDIT_LOG_VIEW,
-    PERMISSIONS.USER_MANAGE,
   ],
 
   [ROLES.HR_MANAGER]: [
+    PERMISSIONS.COMPANY_VIEW,
+    PERMISSIONS.DESIGNATION_VIEW,
+    PERMISSIONS.DESIGNATION_MANAGE,
+    PERMISSIONS.EMPLOYMENT_TYPE_VIEW,
+    PERMISSIONS.EMPLOYMENT_TYPE_MANAGE,
+    PERMISSIONS.BRANCH_VIEW,
+    PERMISSIONS.BRANCH_CREATE,
+    PERMISSIONS.BRANCH_UPDATE,
+    PERMISSIONS.EMPLOYEE_VIEW,
+    PERMISSIONS.EMPLOYEE_CREATE,
+    PERMISSIONS.EMPLOYEE_UPDATE,
+    PERMISSIONS.EMPLOYEE_DELETE,
+    PERMISSIONS.DEPARTMENT_VIEW,
+    PERMISSIONS.DEPARTMENT_MANAGE,
+    PERMISSIONS.ATTENDANCE_VIEW,
+    PERMISSIONS.ATTENDANCE_MANAGE,
+    PERMISSIONS.LEAVE_VIEW,
+    PERMISSIONS.LEAVE_APPROVE,
+    PERMISSIONS.DOCUMENT_VIEW,
+    PERMISSIONS.DOCUMENT_MANAGE,
+    PERMISSIONS.PAYROLL_VIEW,
+    PERMISSIONS.REPORT_VIEW,
+  ],
+
+  [ROLES.HR_EXECUTIVE]: [
+    PERMISSIONS.BRANCH_VIEW,
+    PERMISSIONS.DESIGNATION_VIEW,
+    PERMISSIONS.EMPLOYMENT_TYPE_VIEW,
     PERMISSIONS.EMPLOYEE_VIEW,
     PERMISSIONS.EMPLOYEE_CREATE,
     PERMISSIONS.EMPLOYEE_UPDATE,
@@ -57,14 +119,23 @@ export const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
     PERMISSIONS.ATTENDANCE_MANAGE,
     PERMISSIONS.LEAVE_VIEW,
     PERMISSIONS.LEAVE_APPROVE,
-    PERMISSIONS.PAYROLL_VIEW,
     PERMISSIONS.DOCUMENT_VIEW,
     PERMISSIONS.DOCUMENT_MANAGE,
     PERMISSIONS.REPORT_VIEW,
   ],
 
-  [ROLES.MANAGER]: [
+  [ROLES.FINANCE]: [
+    PERMISSIONS.PAYROLL_VIEW,
+    PERMISSIONS.PAYROLL_PROCESS,
     PERMISSIONS.EMPLOYEE_VIEW,
+    PERMISSIONS.DOCUMENT_VIEW,
+    PERMISSIONS.REPORT_VIEW,
+  ],
+
+  [ROLES.DEPARTMENT_MANAGER]: [
+    PERMISSIONS.EMPLOYEE_VIEW,
+    PERMISSIONS.DESIGNATION_VIEW,
+    PERMISSIONS.EMPLOYMENT_TYPE_VIEW,
     PERMISSIONS.DEPARTMENT_VIEW,
     PERMISSIONS.ATTENDANCE_VIEW,
     PERMISSIONS.LEAVE_VIEW,
@@ -80,11 +151,7 @@ export const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
   ],
 };
 
-/** Human-readable labels for UI (badges, dropdowns, settings). */
-export const ROLE_LABELS: Record<Role, string> = {
-  [ROLES.SUPER_ADMIN]: "Super Admin",
-  [ROLES.HR_ADMIN]: "HR Admin",
-  [ROLES.HR_MANAGER]: "HR Manager",
-  [ROLES.MANAGER]: "Manager",
-  [ROLES.EMPLOYEE]: "Employee",
-};
+/** Type guard: is `value` a known role key? */
+export function isRole(value: string): value is Role {
+  return (ROLE_ORDER as readonly string[]).includes(value);
+}

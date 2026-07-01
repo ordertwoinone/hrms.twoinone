@@ -12,8 +12,14 @@ export const ROUTES = {
 
   // Authenticated app
   dashboard: "/dashboard",
+  users: "/users",
+  company: "/company",
+  unauthorized: "/unauthorized",
   employees: "/employees",
+  branches: "/branches",
   departments: "/departments",
+  designations: "/designations",
+  employmentTypes: "/employment-types",
   attendance: "/attendance",
   leave: "/leave",
   payroll: "/payroll",

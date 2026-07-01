@@ -61,8 +61,13 @@ export async function updateSession(
     return NextResponse.redirect(url);
   }
 
-  // Authenticated user hitting an auth page → send to the dashboard.
-  if (user && isPublicRoute(pathname) && pathname !== ROUTES.home) {
+  // Authenticated user hitting the login/forgot pages → send to the dashboard.
+  // (Reset-password and the auth callback are intentionally excluded so the
+  // password-recovery session can complete.)
+  if (
+    user &&
+    (pathname === ROUTES.login || pathname === ROUTES.forgotPassword)
+  ) {
     const url = request.nextUrl.clone();
     url.pathname = ROUTES.dashboard;
     return NextResponse.redirect(url);
