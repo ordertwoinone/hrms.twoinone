@@ -1,4 +1,6 @@
 import { Separator } from "@/components/ui/separator";
+import { getCurrentUser } from "@/lib/auth/session";
+import { getBellData } from "@/features/notifications/queries/notifications.queries";
 import { Breadcrumbs } from "./breadcrumbs";
 import { MobileSidebar } from "./mobile-sidebar";
 import { CommandMenu } from "./command-menu";
@@ -19,7 +21,12 @@ import { NavUser } from "./nav-user";
  * The mobile sheet and command palette are mounted here (they portal to the
  * body) so the whole navigation surface lives with the header.
  */
-export function AppHeader() {
+export async function AppHeader() {
+  const user = await getCurrentUser();
+  const bell = user
+    ? await getBellData(user.id)
+    : { items: [], unreadCount: 0 };
+
   return (
     <header className="sticky top-0 z-30 flex h-header items-center gap-2 border-b bg-card/80 px-3 backdrop-blur-md sm:px-4">
       <SidebarToggle />
@@ -31,7 +38,7 @@ export function AppHeader() {
       <div className="flex flex-1 items-center justify-end gap-1.5 md:flex-none">
         <HeaderSearch />
         <QuickActions />
-        <Notifications unread={3} />
+        <Notifications items={bell.items} unread={bell.unreadCount} />
         <ThemeToggle />
         <Separator
           orientation="vertical"

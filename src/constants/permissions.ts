@@ -59,10 +59,37 @@ export const PERMISSIONS = {
   LEAVE_VIEW: "leave:view",
   LEAVE_REQUEST: "leave:request",
   LEAVE_APPROVE: "leave:approve",
+  LEAVE_MANAGE: "leave:manage",
+
+  // Visas (UAE immigration)
+  VISA_VIEW: "visa:view",
+  VISA_MANAGE: "visa:manage",
+
+  // Emirates ID
+  EMIRATES_ID_VIEW: "emirates_id:view",
+  EMIRATES_ID_MANAGE: "emirates_id:manage",
+
+  // Passports
+  PASSPORT_VIEW: "passport:view",
+  PASSPORT_MANAGE: "passport:manage",
+
+  // Labour cards
+  LABOUR_CARD_VIEW: "labour_card:view",
+  LABOUR_CARD_MANAGE: "labour_card:manage",
+
+  // Medical insurance
+  MEDICAL_INSURANCE_VIEW: "medical_insurance:view",
+  MEDICAL_INSURANCE_MANAGE: "medical_insurance:manage",
+
+  // Contracts
+  CONTRACT_VIEW: "contract:view",
+  CONTRACT_MANAGE: "contract:manage",
+  CONTRACT_APPROVE: "contract:approve",
 
   // Payroll
   PAYROLL_VIEW: "payroll:view",
   PAYROLL_PROCESS: "payroll:process",
+  PAYROLL_APPROVE: "payroll:approve",
 
   // Documents
   DOCUMENT_VIEW: "document:view",
@@ -70,6 +97,9 @@ export const PERMISSIONS = {
 
   // Reports
   REPORT_VIEW: "report:view",
+
+  // Notifications (running scans / broadcasting)
+  NOTIFICATION_MANAGE: "notification:manage",
 } as const;
 
 export type Permission = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];

@@ -21,6 +21,16 @@ export const STORAGE_BUCKETS = {
   documents: "documents",
   payslips: "payslips",
   company: "company",
+  employeePhotos: "employee-photos",
+  employeeDocuments: "employee-documents",
+  leaveAttachments: "leave-attachments",
+  visaDocuments: "visa-documents",
+  emiratesIdDocuments: "emirates-id-documents",
+  passportDocuments: "passport-documents",
+  labourCardDocuments: "labour-card-documents",
+  medicalInsuranceDocuments: "medical-insurance-documents",
+  contractDocuments: "contract-documents",
+  hrLetters: "hr-letters",
 } as const;
 
 /** Default UAE locale settings. */

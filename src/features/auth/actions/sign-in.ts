@@ -6,6 +6,7 @@ import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import type { Database } from "@/types/database.types";
 import type { ActionResult } from "@/types/common";
 import { env } from "@/lib/env";
+import { recordAudit } from "@/server/audit";
 import { loginSchema, type LoginInput } from "../schemas/auth.schema";
 
 /**
@@ -88,6 +89,13 @@ export async function signInAction(raw: LoginInput): Promise<ActionResult> {
     .from("profiles")
     .update({ last_sign_in_at: new Date().toISOString() })
     .eq("id", data.user.id);
+
+  await recordAudit({
+    actorId: data.user.id,
+    action: "login",
+    entity: "auth",
+    entityId: data.user.id,
+  });
 
   return { success: true, data: undefined };
 }

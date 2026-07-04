@@ -23,55 +23,55 @@ export class ActionError extends Error {
 
 /**
  * `createAction` is the standard wrapper for every Server Action in the app. It
- * centralizes: auth, permission checks, Zod input validation, and error → typed
- * `ActionResult` mapping. Feature actions stay thin and focus on domain logic.
+ * centralizes auth, permission checks, Zod validation, and error → typed
+ * `ActionResult` mapping. The handler receives the schema's **parsed output**
+ * (defaults applied, values coerced); callers pass the schema's **input**.
  *
  * Usage:
  *
  *   export const createEmployee = createAction({
  *     input: createEmployeeSchema,
  *     permission: PERMISSIONS.EMPLOYEE_CREATE,
- *     handler: async ({ input, user }) => { ... return employee; },
+ *     handler: async ({ input, user }) => { ... return { id }; },
  *   });
  */
-interface ActionConfig<TInput, TOutput> {
-  /** Zod schema validating the raw input. Omit for no-argument actions. */
-  input?: z.ZodType<TInput>;
+interface ActionConfig<TSchema extends z.ZodTypeAny, TOutput> {
+  /** Zod schema validating the raw input. */
+  input: TSchema;
   /** Permission(s) required to run. Omit to require only authentication. */
   permission?: Permission | Permission[];
   /** The domain logic. Receives validated input and the authorized user. */
-  handler: (ctx: { input: TInput; user: AuthUser }) => Promise<TOutput>;
+  handler: (ctx: {
+    input: z.output<TSchema>;
+    user: AuthUser;
+  }) => Promise<TOutput>;
 }
 
-export function createAction<TInput, TOutput>(
-  config: ActionConfig<TInput, TOutput>,
-) {
-  return async (rawInput: TInput): Promise<ActionResult<TOutput>> => {
+export function createAction<TSchema extends z.ZodTypeAny, TOutput>(
+  config: ActionConfig<TSchema, TOutput>,
+): (rawInput: z.input<TSchema>) => Promise<ActionResult<TOutput>> {
+  return async (rawInput) => {
     try {
       // 1. Authentication / authorization.
       const user = config.permission
         ? await assertPermission(config.permission)
         : await requireAuth();
 
-      // 2. Input validation.
-      let input = rawInput;
-      if (config.input) {
-        const parsed = config.input.safeParse(rawInput);
-        if (!parsed.success) {
-          return {
-            success: false,
-            error: "Validation failed.",
-            fieldErrors: parsed.error.flatten().fieldErrors as Record<
-              string,
-              string[]
-            >,
-          };
-        }
-        input = parsed.data;
+      // 2. Input validation (defaults + coercion applied).
+      const parsed = config.input.safeParse(rawInput);
+      if (!parsed.success) {
+        return {
+          success: false,
+          error: "Please check the form and try again.",
+          fieldErrors: parsed.error.flatten().fieldErrors as Record<
+            string,
+            string[]
+          >,
+        };
       }
 
       // 3. Domain logic.
-      const data = await config.handler({ input, user });
+      const data = await config.handler({ input: parsed.data, user });
       return { success: true, data };
     } catch (error) {
       if (error instanceof AuthorizationError || error instanceof ActionError) {

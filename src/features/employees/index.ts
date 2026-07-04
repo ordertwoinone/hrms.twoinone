@@ -1,11 +1,17 @@
 /**
- * Public API barrel for the Employees module — the ONLY surface other modules
- * may import from. Everything else under `features/employees/**` is internal.
- *
- * STRUCTURE ONLY: exports are added as the module is built. Example shape:
- *
- *   export { EmployeesTable } from "./components/employees-table";
- *   export { getEmployees } from "./queries/get-employees";
- *   export type { Employee } from "./types";
+ * Public API for the Employees module.
  */
-export {};
+export { EmployeesTable } from "./components/employees-table";
+export { EmployeeProfile } from "./components/employee-profile";
+export {
+  getEmployees,
+  getEmployeeById,
+  getEmployeeFormOptions,
+  getEmployeeActivity,
+} from "./queries/employees.queries";
+export type {
+  Employee,
+  EmployeeListItem,
+  EmployeeStatus,
+  EmployeeProfile as EmployeeProfileData,
+} from "./types";
