@@ -7,7 +7,7 @@ import { PageHeader } from "@/components/shared/page-header";
 import { AttendanceWorkspace } from "@/features/attendance/components/attendance-workspace";
 import {
   getAttendanceLogs,
-  getAttendanceSummary,
+  computeAttendanceSummary,
   getAttendanceFormOptions,
 } from "@/features/attendance/queries/attendance.queries";
 
@@ -23,11 +23,11 @@ export default async function AttendancePage({ searchParams }: PageProps) {
 
   const currentMonth = params.month ?? new Date().toISOString().slice(0, 7);
 
-  const [rows, summary, options] = await Promise.all([
+  const [rows, options] = await Promise.all([
     getAttendanceLogs({ month: currentMonth }),
-    getAttendanceSummary(currentMonth),
     getAttendanceFormOptions(),
   ]);
+  const summary = computeAttendanceSummary(rows);
 
   const canManage = hasPermission(user.permissions, PERMISSIONS.ATTENDANCE_MANAGE);
 

@@ -70,16 +70,20 @@ export async function getOvertimeRequests(params: {
   }));
 }
 
-export async function getOvertimeSummary(): Promise<OvertimeSummary> {
-  const rows = await getOvertimeRequests();
+export function computeOvertimeSummary(requests: OvertimeRequestItem[]): OvertimeSummary {
   let totalHours = 0;
-  for (const r of rows) {
+  for (const r of requests) {
     if (r.status === "approved") totalHours += r.hoursRequested;
   }
   return {
-    pending: rows.filter((r) => r.status === "pending").length,
-    approved: rows.filter((r) => r.status === "approved").length,
-    rejected: rows.filter((r) => r.status === "rejected").length,
+    pending: requests.filter((r) => r.status === "pending").length,
+    approved: requests.filter((r) => r.status === "approved").length,
+    rejected: requests.filter((r) => r.status === "rejected").length,
     totalHoursApproved: Math.round(totalHours * 10) / 10,
   };
+}
+
+export async function getOvertimeSummary(): Promise<OvertimeSummary> {
+  const rows = await getOvertimeRequests();
+  return computeOvertimeSummary(rows);
 }

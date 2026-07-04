@@ -7,7 +7,7 @@ import { PageHeader } from "@/components/shared/page-header";
 import { OvertimeWorkspace } from "@/features/overtime/components/overtime-workspace";
 import {
   getOvertimeRequests,
-  getOvertimeSummary,
+  computeOvertimeSummary,
 } from "@/features/overtime/queries/overtime.queries";
 
 export const metadata: Metadata = { title: "Overtime Management" };
@@ -15,10 +15,8 @@ export const metadata: Metadata = { title: "Overtime Management" };
 export default async function OvertimePage() {
   const user = await requirePermission(PERMISSIONS.OVERTIME_VIEW);
 
-  const [requests, summary] = await Promise.all([
-    getOvertimeRequests(),
-    getOvertimeSummary(),
-  ]);
+  const requests = await getOvertimeRequests();
+  const summary = computeOvertimeSummary(requests);
 
   const canApprove = hasPermission(user.permissions, PERMISSIONS.OVERTIME_APPROVE);
 

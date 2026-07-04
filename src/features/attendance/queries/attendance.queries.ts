@@ -69,12 +69,7 @@ export async function getAttendanceLogs(
   return (data ?? []).map(toListItem);
 }
 
-export async function getAttendanceSummary(
-  month: string,
-  employeeId?: string,
-): Promise<AttendanceSummary> {
-  const rows = await getAttendanceLogs({ month, employeeId });
-
+export function computeAttendanceSummary(rows: AttendanceListItem[]): AttendanceSummary {
   const counts = { present: 0, absent: 0, late: 0, half_day: 0, on_leave: 0, holiday: 0, weekend: 0 };
   let totalOT = 0;
 
@@ -97,6 +92,14 @@ export async function getAttendanceSummary(
     totalOvertimeHours: Math.round((totalOT / 60) * 10) / 10,
     attendanceRate: workDays > 0 ? Math.round((attended / workDays) * 100) : 0,
   };
+}
+
+export async function getAttendanceSummary(
+  month: string,
+  employeeId?: string,
+): Promise<AttendanceSummary> {
+  const rows = await getAttendanceLogs({ month, employeeId });
+  return computeAttendanceSummary(rows);
 }
 
 export async function getShifts(): Promise<ShiftItem[]> {
