@@ -1,4 +1,4 @@
-export type Json =
+﻿export type Json =
   | string
   | number
   | boolean
@@ -331,6 +331,165 @@ export type Database = {
             columns: ["manager_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      candidates: {
+        Row: {
+          company_id: string
+          created_at: string
+          current_employer: string | null
+          current_title: string | null
+          deleted_at: string | null
+          email: string | null
+          full_name: string
+          id: string
+          linkedin_url: string | null
+          nationality: string | null
+          notes: string | null
+          phone: string | null
+          resume_url: string | null
+          source: string | null
+          tags: string[] | null
+          updated_at: string
+          years_experience: number | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          current_employer?: string | null
+          current_title?: string | null
+          deleted_at?: string | null
+          email?: string | null
+          full_name: string
+          id?: string
+          linkedin_url?: string | null
+          nationality?: string | null
+          notes?: string | null
+          phone?: string | null
+          resume_url?: string | null
+          source?: string | null
+          tags?: string[] | null
+          updated_at?: string
+          years_experience?: number | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          current_employer?: string | null
+          current_title?: string | null
+          deleted_at?: string | null
+          email?: string | null
+          full_name?: string
+          id?: string
+          linkedin_url?: string | null
+          nationality?: string | null
+          notes?: string | null
+          phone?: string | null
+          resume_url?: string | null
+          source?: string | null
+          tags?: string[] | null
+          updated_at?: string
+          years_experience?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "candidates_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      checklist_template_items: {
+        Row: {
+          created_at: string
+          description: string | null
+          due_day_offset: number
+          id: string
+          responsible_role: string | null
+          sort_order: number
+          template_id: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          due_day_offset?: number
+          id?: string
+          responsible_role?: string | null
+          sort_order?: number
+          template_id: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          due_day_offset?: number
+          id?: string
+          responsible_role?: string | null
+          sort_order?: number
+          template_id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "checklist_template_items_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "checklist_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      checklist_templates: {
+        Row: {
+          company_id: string
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          description: string | null
+          id: string
+          name: string
+          status: string
+          type: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          status?: string
+          type?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          status?: string
+          type?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "checklist_templates_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
             referencedColumns: ["id"]
           },
         ]
@@ -1526,6 +1685,208 @@ export type Database = {
           },
         ]
       }
+      job_applications: {
+        Row: {
+          applied_at: string
+          assigned_to: string | null
+          candidate_id: string
+          company_id: string
+          created_at: string
+          expected_joining: string | null
+          hired_at: string | null
+          id: string
+          interviewed_at: string | null
+          job_posting_id: string
+          notes: string | null
+          offered_at: string | null
+          offered_currency: string | null
+          offered_salary: number | null
+          rating: number | null
+          rejected_at: string | null
+          rejection_reason: string | null
+          screened_at: string | null
+          stage: string
+          updated_at: string
+        }
+        Insert: {
+          applied_at?: string
+          assigned_to?: string | null
+          candidate_id: string
+          company_id: string
+          created_at?: string
+          expected_joining?: string | null
+          hired_at?: string | null
+          id?: string
+          interviewed_at?: string | null
+          job_posting_id: string
+          notes?: string | null
+          offered_at?: string | null
+          offered_currency?: string | null
+          offered_salary?: number | null
+          rating?: number | null
+          rejected_at?: string | null
+          rejection_reason?: string | null
+          screened_at?: string | null
+          stage?: string
+          updated_at?: string
+        }
+        Update: {
+          applied_at?: string
+          assigned_to?: string | null
+          candidate_id?: string
+          company_id?: string
+          created_at?: string
+          expected_joining?: string | null
+          hired_at?: string | null
+          id?: string
+          interviewed_at?: string | null
+          job_posting_id?: string
+          notes?: string | null
+          offered_at?: string | null
+          offered_currency?: string | null
+          offered_salary?: number | null
+          rating?: number | null
+          rejected_at?: string | null
+          rejection_reason?: string | null
+          screened_at?: string | null
+          stage?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_applications_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "candidates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_applications_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_applications_job_posting_id_fkey"
+            columns: ["job_posting_id"]
+            isOneToOne: false
+            referencedRelation: "job_postings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      job_postings: {
+        Row: {
+          branch_id: string | null
+          closes_at: string | null
+          company_id: string
+          created_at: string
+          created_by: string | null
+          currency: string
+          deleted_at: string | null
+          department_id: string | null
+          description: string | null
+          designation_id: string | null
+          employment_type_id: string | null
+          headcount: number
+          id: string
+          location: string | null
+          published_at: string | null
+          requirements: string | null
+          salary_max: number | null
+          salary_min: number | null
+          status: string
+          title: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          branch_id?: string | null
+          closes_at?: string | null
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          deleted_at?: string | null
+          department_id?: string | null
+          description?: string | null
+          designation_id?: string | null
+          employment_type_id?: string | null
+          headcount?: number
+          id?: string
+          location?: string | null
+          published_at?: string | null
+          requirements?: string | null
+          salary_max?: number | null
+          salary_min?: number | null
+          status?: string
+          title: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          branch_id?: string | null
+          closes_at?: string | null
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          deleted_at?: string | null
+          department_id?: string | null
+          description?: string | null
+          designation_id?: string | null
+          employment_type_id?: string | null
+          headcount?: number
+          id?: string
+          location?: string | null
+          published_at?: string | null
+          requirements?: string | null
+          salary_max?: number | null
+          salary_min?: number | null
+          status?: string
+          title?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_postings_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_postings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_postings_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_postings_designation_id_fkey"
+            columns: ["designation_id"]
+            isOneToOne: false
+            referencedRelation: "designations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_postings_employment_type_id_fkey"
+            columns: ["employment_type_id"]
+            isOneToOne: false
+            referencedRelation: "employment_types"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       labour_cards: {
         Row: {
           attachment_name: string | null
@@ -2013,6 +2374,230 @@ export type Database = {
         }
         Relationships: []
       }
+      onboarding_checklists: {
+        Row: {
+          company_id: string
+          completed_at: string | null
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          employee_id: string
+          id: string
+          status: string
+          target_date: string | null
+          template_id: string | null
+          title: string
+          type: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          company_id: string
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          employee_id: string
+          id?: string
+          status?: string
+          target_date?: string | null
+          template_id?: string | null
+          title: string
+          type?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          company_id?: string
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          employee_id?: string
+          id?: string
+          status?: string
+          target_date?: string | null
+          template_id?: string | null
+          title?: string
+          type?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "onboarding_checklists_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "onboarding_checklists_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "onboarding_checklists_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "checklist_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      onboarding_tasks: {
+        Row: {
+          checklist_id: string
+          completed_at: string | null
+          completed_by: string | null
+          created_at: string
+          description: string | null
+          due_date: string | null
+          id: string
+          responsible_role: string | null
+          sort_order: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          checklist_id: string
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          responsible_role?: string | null
+          sort_order?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          checklist_id?: string
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          responsible_role?: string | null
+          sort_order?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "onboarding_tasks_checklist_id_fkey"
+            columns: ["checklist_id"]
+            isOneToOne: false
+            referencedRelation: "onboarding_checklists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      overtime_requests: {
+        Row: {
+          company_id: string
+          created_at: string
+          date: string
+          deleted_at: string | null
+          employee_id: string
+          end_time: string
+          hours_requested: number
+          hr_id: string | null
+          hr_remarks: string | null
+          hr_reviewed_at: string | null
+          hr_status: string | null
+          id: string
+          manager_id: string | null
+          manager_remarks: string | null
+          manager_reviewed_at: string | null
+          manager_status: string | null
+          payroll_run_id: string | null
+          reason: string | null
+          start_time: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          date: string
+          deleted_at?: string | null
+          employee_id: string
+          end_time: string
+          hours_requested: number
+          hr_id?: string | null
+          hr_remarks?: string | null
+          hr_reviewed_at?: string | null
+          hr_status?: string | null
+          id?: string
+          manager_id?: string | null
+          manager_remarks?: string | null
+          manager_reviewed_at?: string | null
+          manager_status?: string | null
+          payroll_run_id?: string | null
+          reason?: string | null
+          start_time: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          date?: string
+          deleted_at?: string | null
+          employee_id?: string
+          end_time?: string
+          hours_requested?: number
+          hr_id?: string | null
+          hr_remarks?: string | null
+          hr_reviewed_at?: string | null
+          hr_status?: string | null
+          id?: string
+          manager_id?: string | null
+          manager_remarks?: string | null
+          manager_reviewed_at?: string | null
+          manager_status?: string | null
+          payroll_run_id?: string | null
+          reason?: string | null
+          start_time?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "overtime_requests_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "overtime_requests_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "overtime_requests_manager_id_fkey"
+            columns: ["manager_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "overtime_requests_payroll_run_id_fkey"
+            columns: ["payroll_run_id"]
+            isOneToOne: false
+            referencedRelation: "payroll_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       passports: {
         Row: {
           attachment_name: string | null
@@ -2087,6 +2672,89 @@ export type Database = {
             columns: ["employee_id"]
             isOneToOne: false
             referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payroll_config: {
+        Row: {
+          agent_id: string | null
+          bank_routing_code: string | null
+          company_id: string
+          created_at: string
+          currency: string
+          employer_id: string | null
+          gratuity_5yr_plus_rate: number
+          gratuity_5yr_rate: number
+          gratuity_enabled: boolean
+          housing_allowance: number
+          id: string
+          meal_allowance: number
+          other_allowance: number
+          overtime_rate_holiday: number
+          overtime_rate_weekday: number
+          overtime_rate_weekend: number
+          payroll_day: number
+          social_security_employee_pct: number
+          social_security_employer_pct: number
+          transport_allowance: number
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          agent_id?: string | null
+          bank_routing_code?: string | null
+          company_id: string
+          created_at?: string
+          currency?: string
+          employer_id?: string | null
+          gratuity_5yr_plus_rate?: number
+          gratuity_5yr_rate?: number
+          gratuity_enabled?: boolean
+          housing_allowance?: number
+          id?: string
+          meal_allowance?: number
+          other_allowance?: number
+          overtime_rate_holiday?: number
+          overtime_rate_weekday?: number
+          overtime_rate_weekend?: number
+          payroll_day?: number
+          social_security_employee_pct?: number
+          social_security_employer_pct?: number
+          transport_allowance?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          agent_id?: string | null
+          bank_routing_code?: string | null
+          company_id?: string
+          created_at?: string
+          currency?: string
+          employer_id?: string | null
+          gratuity_5yr_plus_rate?: number
+          gratuity_5yr_rate?: number
+          gratuity_enabled?: boolean
+          housing_allowance?: number
+          id?: string
+          meal_allowance?: number
+          other_allowance?: number
+          overtime_rate_holiday?: number
+          overtime_rate_weekday?: number
+          overtime_rate_weekend?: number
+          payroll_day?: number
+          social_security_employee_pct?: number
+          social_security_employer_pct?: number
+          transport_allowance?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payroll_config_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "companies"
             referencedColumns: ["id"]
           },
         ]
@@ -2258,6 +2926,215 @@ export type Database = {
             columns: ["run_id"]
             isOneToOne: false
             referencedRelation: "payroll_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      performance_cycles: {
+        Row: {
+          company_id: string
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          end_date: string
+          id: string
+          manager_review_deadline: string | null
+          name: string
+          self_review_deadline: string | null
+          start_date: string
+          status: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          end_date: string
+          id?: string
+          manager_review_deadline?: string | null
+          name: string
+          self_review_deadline?: string | null
+          start_date: string
+          status?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          end_date?: string
+          id?: string
+          manager_review_deadline?: string | null
+          name?: string
+          self_review_deadline?: string | null
+          start_date?: string
+          status?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "performance_cycles_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      performance_goals: {
+        Row: {
+          achieved_value: string | null
+          company_id: string
+          created_at: string
+          created_by: string | null
+          cycle_id: string
+          description: string | null
+          employee_id: string
+          id: string
+          status: string
+          target_value: string | null
+          title: string
+          updated_at: string
+          weight: number | null
+        }
+        Insert: {
+          achieved_value?: string | null
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          cycle_id: string
+          description?: string | null
+          employee_id: string
+          id?: string
+          status?: string
+          target_value?: string | null
+          title: string
+          updated_at?: string
+          weight?: number | null
+        }
+        Update: {
+          achieved_value?: string | null
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          cycle_id?: string
+          description?: string | null
+          employee_id?: string
+          id?: string
+          status?: string
+          target_value?: string | null
+          title?: string
+          updated_at?: string
+          weight?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "performance_goals_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "performance_goals_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "performance_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "performance_goals_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      performance_reviews: {
+        Row: {
+          acknowledged_at: string | null
+          comments: string | null
+          company_id: string
+          created_at: string
+          cycle_id: string
+          employee_id: string
+          id: string
+          improvements: string | null
+          overall_rating: number | null
+          reviewer_id: string | null
+          status: string
+          strengths: string | null
+          submitted_at: string | null
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          comments?: string | null
+          company_id: string
+          created_at?: string
+          cycle_id: string
+          employee_id: string
+          id?: string
+          improvements?: string | null
+          overall_rating?: number | null
+          reviewer_id?: string | null
+          status?: string
+          strengths?: string | null
+          submitted_at?: string | null
+          type?: string
+          updated_at?: string
+        }
+        Update: {
+          acknowledged_at?: string | null
+          comments?: string | null
+          company_id?: string
+          created_at?: string
+          cycle_id?: string
+          employee_id?: string
+          id?: string
+          improvements?: string | null
+          overall_rating?: number | null
+          reviewer_id?: string | null
+          status?: string
+          strengths?: string | null
+          submitted_at?: string | null
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "performance_reviews_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "performance_reviews_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "performance_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "performance_reviews_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "performance_reviews_reviewer_id_fkey"
+            columns: ["reviewer_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
             referencedColumns: ["id"]
           },
         ]
@@ -2549,6 +3426,215 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      system_preferences: {
+        Row: {
+          company_id: string
+          created_at: string
+          date_format: string
+          enable_overtime_module: boolean
+          enable_performance_module: boolean
+          enable_recruitment_module: boolean
+          enable_self_service: boolean
+          enable_training_module: boolean
+          fiscal_year_start_month: number
+          id: string
+          language: string
+          notify_birthday: boolean
+          notify_contract_expiry: boolean
+          notify_document_expiry: boolean
+          notify_leave_approval: boolean
+          time_format: string
+          timezone: string
+          updated_at: string
+          updated_by: string | null
+          work_days: string[]
+          work_week_start: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          date_format?: string
+          enable_overtime_module?: boolean
+          enable_performance_module?: boolean
+          enable_recruitment_module?: boolean
+          enable_self_service?: boolean
+          enable_training_module?: boolean
+          fiscal_year_start_month?: number
+          id?: string
+          language?: string
+          notify_birthday?: boolean
+          notify_contract_expiry?: boolean
+          notify_document_expiry?: boolean
+          notify_leave_approval?: boolean
+          time_format?: string
+          timezone?: string
+          updated_at?: string
+          updated_by?: string | null
+          work_days?: string[]
+          work_week_start?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          date_format?: string
+          enable_overtime_module?: boolean
+          enable_performance_module?: boolean
+          enable_recruitment_module?: boolean
+          enable_self_service?: boolean
+          enable_training_module?: boolean
+          fiscal_year_start_month?: number
+          id?: string
+          language?: string
+          notify_birthday?: boolean
+          notify_contract_expiry?: boolean
+          notify_document_expiry?: boolean
+          notify_leave_approval?: boolean
+          time_format?: string
+          timezone?: string
+          updated_at?: string
+          updated_by?: string | null
+          work_days?: string[]
+          work_week_start?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "system_preferences_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      training_courses: {
+        Row: {
+          category: string | null
+          company_id: string
+          created_at: string
+          created_by: string | null
+          deadline: string | null
+          deleted_at: string | null
+          description: string | null
+          duration_hours: number | null
+          id: string
+          max_seats: number | null
+          mode: string
+          provider: string | null
+          scheduled_date: string | null
+          status: string
+          title: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          category?: string | null
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          deadline?: string | null
+          deleted_at?: string | null
+          description?: string | null
+          duration_hours?: number | null
+          id?: string
+          max_seats?: number | null
+          mode?: string
+          provider?: string | null
+          scheduled_date?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          category?: string | null
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          deadline?: string | null
+          deleted_at?: string | null
+          description?: string | null
+          duration_hours?: number | null
+          id?: string
+          max_seats?: number | null
+          mode?: string
+          provider?: string | null
+          scheduled_date?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "training_courses_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      training_enrollments: {
+        Row: {
+          certificate_url: string | null
+          company_id: string
+          completion_date: string | null
+          course_id: string
+          employee_id: string
+          enrolled_at: string
+          id: string
+          score: number | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          certificate_url?: string | null
+          company_id: string
+          completion_date?: string | null
+          course_id: string
+          employee_id: string
+          enrolled_at?: string
+          id?: string
+          score?: number | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          certificate_url?: string | null
+          company_id?: string
+          completion_date?: string | null
+          course_id?: string
+          employee_id?: string
+          enrolled_at?: string
+          id?: string
+          score?: number | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "training_enrollments_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "training_enrollments_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "training_courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "training_enrollments_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
             referencedColumns: ["id"]
           },
         ]

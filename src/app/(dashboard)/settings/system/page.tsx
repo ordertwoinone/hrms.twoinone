@@ -1,19 +1,19 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowLeft, SlidersHorizontal } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 
 import { PERMISSIONS } from "@/constants/permissions";
 import { requirePermission } from "@/lib/auth/guards";
 import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
-import { EmptyState } from "@/components/shared/empty-state";
+import { SystemPrefsForm } from "@/features/settings/components/system-prefs-form";
+import { getSystemPreferences } from "@/features/settings/queries/settings.queries";
 
-export const metadata: Metadata = {
-  title: "System Preferences — Settings",
-};
+export const metadata: Metadata = { title: "System Preferences — Settings" };
 
 export default async function SystemPreferencesPage() {
   await requirePermission(PERMISSIONS.SETTINGS_VIEW);
+  const prefs = await getSystemPreferences();
 
   return (
     <div className="space-y-6">
@@ -27,13 +27,9 @@ export default async function SystemPreferencesPage() {
       </div>
       <PageHeader
         title="System Preferences"
-        description="Date formats, language, locale, and global application behaviour."
+        description="Locale, date format, work week, module visibility, and email notification settings."
       />
-      <EmptyState
-        icon={SlidersHorizontal}
-        title="Coming soon"
-        description="System preference controls will be available in the next release."
-      />
+      <SystemPrefsForm defaults={prefs} />
     </div>
   );
 }

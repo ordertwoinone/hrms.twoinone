@@ -37,6 +37,15 @@ export const ROUTES = {
   selfService: "/self-service",
   notifications: "/notifications",
 
+  // New modules
+  onboarding: "/onboarding",
+  performance: "/performance",
+  training: "/training",
+  overtime: "/overtime",
+  wps: "/wps",
+  recruitment: "/recruitment",
+  shifts: "/attendance/shifts",
+
   // Auth infrastructure
   authCallback: "/auth/callback",
   signOut: "/auth/sign-out",

@@ -1,19 +1,19 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowLeft, Wallet } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 
 import { PERMISSIONS } from "@/constants/permissions";
 import { requirePermission } from "@/lib/auth/guards";
 import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
-import { EmptyState } from "@/components/shared/empty-state";
+import { PayrollConfigForm } from "@/features/settings/components/payroll-config-form";
+import { getPayrollConfig } from "@/features/settings/queries/settings.queries";
 
-export const metadata: Metadata = {
-  title: "Payroll Configuration — Settings",
-};
+export const metadata: Metadata = { title: "Payroll Configuration — Settings" };
 
 export default async function PayrollConfigPage() {
   await requirePermission(PERMISSIONS.SETTINGS_VIEW);
+  const config = await getPayrollConfig();
 
   return (
     <div className="space-y-6">
@@ -27,13 +27,9 @@ export default async function PayrollConfigPage() {
       </div>
       <PageHeader
         title="Payroll Configuration"
-        description="Overtime multipliers, allowance rules, and deduction settings."
+        description="Overtime multipliers, monthly allowances, gratuity rules, and WPS details."
       />
-      <EmptyState
-        icon={Wallet}
-        title="Coming soon"
-        description="Payroll configuration settings will be available in the next release."
-      />
+      <PayrollConfigForm defaults={config} />
     </div>
   );
 }

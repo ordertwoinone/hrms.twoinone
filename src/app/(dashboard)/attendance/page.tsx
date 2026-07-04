@@ -1,28 +1,48 @@
 import type { Metadata } from "next";
-import { CalendarClock } from "lucide-react";
 
 import { PERMISSIONS } from "@/constants/permissions";
 import { requirePermission } from "@/lib/auth/guards";
+import { hasPermission } from "@/lib/auth/rbac";
 import { PageHeader } from "@/components/shared/page-header";
-import { EmptyState } from "@/components/shared/empty-state";
+import { AttendanceWorkspace } from "@/features/attendance/components/attendance-workspace";
+import {
+  getAttendanceLogs,
+  getAttendanceSummary,
+  getAttendanceFormOptions,
+} from "@/features/attendance/queries/attendance.queries";
 
-export const metadata: Metadata = {
-  title: "Attendance",
-};
+export const metadata: Metadata = { title: "Attendance" };
 
-export default async function AttendancePage() {
-  await requirePermission(PERMISSIONS.ATTENDANCE_VIEW);
+interface PageProps {
+  searchParams: Promise<{ month?: string }>;
+}
+
+export default async function AttendancePage({ searchParams }: PageProps) {
+  const user = await requirePermission(PERMISSIONS.ATTENDANCE_VIEW);
+  const params = await searchParams;
+
+  const currentMonth = params.month ?? new Date().toISOString().slice(0, 7);
+
+  const [rows, summary, options] = await Promise.all([
+    getAttendanceLogs({ month: currentMonth }),
+    getAttendanceSummary(currentMonth),
+    getAttendanceFormOptions(),
+  ]);
+
+  const canManage = hasPermission(user.permissions, PERMISSIONS.ATTENDANCE_MANAGE);
 
   return (
     <div className="space-y-6">
       <PageHeader
         title="Attendance"
-        description="Track daily check-ins, check-outs, late arrivals, and absences."
+        description="Track daily check-ins, check-outs, late arrivals, and overtime."
       />
-      <EmptyState
-        icon={CalendarClock}
-        title="Coming soon"
-        description="The Attendance module is under active development and will be available in the next release."
+      <AttendanceWorkspace
+        rows={rows}
+        summary={summary}
+        options={options}
+        currentMonth={currentMonth}
+        canManage={canManage}
       />
     </div>
   );

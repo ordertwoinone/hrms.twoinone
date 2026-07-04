@@ -100,6 +100,31 @@ export const PERMISSIONS = {
 
   // Notifications (running scans / broadcasting)
   NOTIFICATION_MANAGE: "notification:manage",
+
+  // Onboarding / Offboarding
+  ONBOARDING_VIEW: "onboarding:view",
+  ONBOARDING_MANAGE: "onboarding:manage",
+
+  // Performance Management
+  PERFORMANCE_VIEW: "performance:view",
+  PERFORMANCE_MANAGE: "performance:manage",
+
+  // Training & Learning
+  TRAINING_VIEW: "training:view",
+  TRAINING_MANAGE: "training:manage",
+
+  // Overtime
+  OVERTIME_VIEW: "overtime:view",
+  OVERTIME_APPROVE: "overtime:approve",
+  OVERTIME_MANAGE: "overtime:manage",
+
+  // Recruitment / ATS
+  RECRUITMENT_VIEW: "recruitment:view",
+  RECRUITMENT_MANAGE: "recruitment:manage",
+
+  // WPS / UAE Compliance
+  WPS_VIEW: "wps:view",
+  WPS_MANAGE: "wps:manage",
 } as const;
 
 export type Permission = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];

@@ -1,27 +1,37 @@
 import type { Metadata } from "next";
-import { CircleUserRound } from "lucide-react";
 
 import { requireAuth } from "@/lib/auth/session";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { PageHeader } from "@/components/shared/page-header";
-import { EmptyState } from "@/components/shared/empty-state";
+import { ProfileEditor } from "@/features/profile/components/profile-editor";
 
-export const metadata: Metadata = {
-  title: "My Profile",
-};
+export const metadata: Metadata = { title: "My Profile" };
 
 export default async function ProfilePage() {
-  await requireAuth();
+  const user = await requireAuth();
+  const admin = createAdminClient();
+
+  const { data: profile } = await admin
+    .from("profiles")
+    .select("full_name, email, avatar_url, phone")
+    .eq("id", user.id)
+    .maybeSingle();
 
   return (
     <div className="space-y-6">
       <PageHeader
         title="My Profile"
-        description="View and update your personal details, password, and notification preferences."
+        description="Update your personal details, avatar, and password."
       />
-      <EmptyState
-        icon={CircleUserRound}
-        title="Coming soon"
-        description="The Profile page is under active development and will be available in the next release."
+      <ProfileEditor
+        user={{
+          id: user.id,
+          email: profile?.email ?? user.email ?? "",
+          fullName: profile?.full_name ?? user.fullName,
+          phone: profile?.phone ?? null,
+          avatarUrl: profile?.avatar_url ?? user.avatarUrl ?? null,
+          role: user.role,
+        }}
       />
     </div>
   );
