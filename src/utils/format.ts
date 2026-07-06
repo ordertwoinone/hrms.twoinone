@@ -10,9 +10,11 @@ export function formatCurrency(
   amount: number,
   currency: string = LOCALE.currency,
 ): string {
+  // Guard against invalid ISO codes that would throw RangeError (e.g. numeric strings from bad data).
+  const code = /^[A-Z]{3}$/.test(currency) ? currency : LOCALE.currency;
   return new Intl.NumberFormat("en-AE", {
     style: "currency",
-    currency,
+    currency: code,
   }).format(amount);
 }
 

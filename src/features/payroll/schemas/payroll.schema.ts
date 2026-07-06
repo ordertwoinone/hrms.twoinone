@@ -7,11 +7,14 @@ const money = z.coerce.number().min(0).max(10_000_000);
 const pct = z.coerce.number().min(0).max(1);
 const optText = (max: number) => z.string().trim().max(max).optional();
 
+export const CURRENCY_CODES = ["AED", "USD", "EUR", "GBP", "SAR", "QAR", "KWD", "BHD", "OMR"] as const;
+const currencyEnum = z.enum(CURRENCY_CODES).default("AED");
+
 /** Salary revision — inserts a new dated row in employee_salaries. */
 export const reviseSalarySchema = z.object({
   employee_id: uuidSchema,
   effective_date: dateReq,
-  currency: z.string().trim().min(1).max(8).default("AED"),
+  currency: currencyEnum,
   basic: money.default(0),
   housing_allowance: money.default(0),
   transport_allowance: money.default(0),
@@ -81,7 +84,7 @@ export const bankAccountFormSchema = z.object({
   account_number: z.string().trim().min(1).max(30),
   iban: z.string().trim().min(10).max(34),
   account_holder_name: z.string().trim().min(1).max(120),
-  currency: z.string().trim().min(1).max(8).default("AED"),
+  currency: currencyEnum,
   is_primary: z.boolean().default(false),
   notes: optText(500),
 });

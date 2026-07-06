@@ -12,6 +12,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -28,8 +35,13 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { reviseSalary } from "../actions/payroll.actions";
-import { reviseSalarySchema, type ReviseSalaryInput } from "../schemas/payroll.schema";
+import { reviseSalarySchema, CURRENCY_CODES, type ReviseSalaryInput } from "../schemas/payroll.schema";
 import type { SalaryStructureItem } from "../types";
+
+type CurrencyCode = (typeof CURRENCY_CODES)[number];
+function safeCurrency(v: string): CurrencyCode {
+  return (CURRENCY_CODES as readonly string[]).includes(v) ? (v as CurrencyCode) : "AED";
+}
 
 export function ReviseSalaryDialog({
   open,
@@ -42,13 +54,13 @@ export function ReviseSalaryDialog({
 }) {
   const router = useRouter();
 
-  const form = useForm<ReviseSalaryInput>({
+  const form = useForm<ReviseSalaryInput, object, ReviseSalaryInput>({
     resolver: zodResolver(reviseSalarySchema),
     values: employee
       ? {
           employee_id: employee.employeeId,
           effective_date: new Date().toISOString().slice(0, 10),
-          currency: employee.currency,
+          currency: safeCurrency(employee.currency),
           basic: employee.basic,
           housing_allowance: employee.housing,
           transport_allowance: employee.transport,
@@ -135,7 +147,18 @@ export function ReviseSalaryDialog({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Currency</FormLabel>
-                    <FormControl><Input {...field} /></FormControl>
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select currency" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {CURRENCY_CODES.map((c) => (
+                          <SelectItem key={c} value={c}>{c}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
