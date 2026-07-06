@@ -42,7 +42,7 @@ export function PayrollWorkspace({
       </TabsList>
 
       <TabsContent value="overview">
-        <PayrollDashboard data={dashboard} onViewRuns={() => setTab("runs")} />
+        <PayrollDashboard data={dashboard} />
       </TabsContent>
       <TabsContent value="runs">
         <RunsTable runs={runs} canProcess={canProcess} />

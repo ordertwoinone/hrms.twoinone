@@ -38,9 +38,9 @@ export default async function PayrollRunPage({
   return (
     <div className="space-y-6">
       <Button variant="ghost" size="sm" asChild className="-ml-2">
-        <Link href={ROUTES.payroll}>
+        <Link href={ROUTES.payrollRuns}>
           <ArrowLeft className="size-4" />
-          Back to payroll
+          Back to payroll runs
         </Link>
       </Button>
       <RunDetailView

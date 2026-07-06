@@ -216,6 +216,14 @@ export const navigation: NavGroup[] = [
         href: ROUTES.payroll,
         icon: Wallet,
         permission: PERMISSIONS.PAYROLL_VIEW,
+        children: [
+          { title: "Dashboard", href: ROUTES.payroll, permission: PERMISSIONS.PAYROLL_VIEW },
+          { title: "Payroll Runs", href: ROUTES.payrollRuns, permission: PERMISSIONS.PAYROLL_VIEW },
+          { title: "Salary Structures", href: ROUTES.payrollSalaryStructures, permission: PERMISSIONS.SALARY_VIEW },
+          { title: "Loans", href: ROUTES.payrollLoans, permission: PERMISSIONS.LOAN_VIEW },
+          { title: "Advances", href: ROUTES.payrollAdvances, permission: PERMISSIONS.ADVANCE_VIEW },
+          { title: "Bonuses", href: ROUTES.payrollBonuses, permission: PERMISSIONS.BONUS_VIEW },
+        ],
       },
       {
         title: "WPS & Gratuity",

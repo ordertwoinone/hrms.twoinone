@@ -55,6 +55,7 @@ export function PayslipEditDialog({
           bonus: payslip.bonus,
           commission: payslip.commission,
           deductions: payslip.deductions,
+          penalty: payslip.penalty,
           tax: payslip.tax,
           notes: payslip.notes ?? "",
         }
@@ -67,13 +68,21 @@ export function PayslipEditDialog({
         basic: payslip.basic,
         housing: payslip.housing,
         transport: payslip.transport,
+        food: payslip.food,
+        telephone: payslip.telephone,
         other: payslip.other,
+        commissionFixed: 0,
         overtime: Number(v.overtime || 0),
         bonus: Number(v.bonus || 0),
         commission: Number(v.commission || 0),
         deductions: Number(v.deductions || 0),
         loan_deduction: payslip.loanDeduction,
+        advance_deduction: payslip.advanceDeduction,
+        penalty: Number(v.penalty || 0),
         tax: Number(v.tax || 0),
+        ssEmployeePct: 0,
+        absentDays: payslip.absentDays,
+        workingDays: payslip.workingDays || 22,
       })
     : { gross: 0, net: 0 };
 
@@ -159,6 +168,7 @@ export function PayslipEditDialog({
               {money("overtime", "Overtime")}
               {money("bonus", "Bonus")}
               {money("commission", "Commission")}
+              {money("penalty", "Penalty")}
               {money("deductions", "Other deductions")}
               {money("tax", "Tax")}
             </div>

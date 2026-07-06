@@ -125,6 +125,22 @@ export const PERMISSIONS = {
   // WPS / UAE Compliance
   WPS_VIEW: "wps:view",
   WPS_MANAGE: "wps:manage",
+
+  // Salary structures
+  SALARY_VIEW: "salary:view",
+  SALARY_MANAGE: "salary:manage",
+
+  // Loans
+  LOAN_VIEW: "loan:view",
+  LOAN_MANAGE: "loan:manage",
+
+  // Salary advances
+  ADVANCE_VIEW: "advance:view",
+  ADVANCE_MANAGE: "advance:manage",
+
+  // Bonuses
+  BONUS_VIEW: "bonus:view",
+  BONUS_MANAGE: "bonus:manage",
 } as const;
 
 export type Permission = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];
