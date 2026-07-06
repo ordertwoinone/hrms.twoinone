@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 import { createAction, ActionError } from "@/server/safe-action";
 import { recordAudit } from "@/server/audit";
@@ -130,6 +130,7 @@ export const createLoan = createAction({
     });
     if (error) throw new ActionError(error.message);
     revalidatePath(ROUTES.payrollLoans);
+    revalidateTag("payroll-dashboard");
     return { ok: true };
   },
 });
@@ -156,6 +157,7 @@ export const updateLoan = createAction({
       .is("deleted_at", null);
     if (error) throw new ActionError(error.message);
     revalidatePath(ROUTES.payrollLoans);
+    revalidateTag("payroll-dashboard");
     return { ok: true };
   },
 });
@@ -172,6 +174,7 @@ export const deleteLoan = createAction({
       .is("deleted_at", null);
     if (error) throw new ActionError(error.message);
     revalidatePath(ROUTES.payrollLoans);
+    revalidateTag("payroll-dashboard");
     return { ok: true };
   },
 });
@@ -351,6 +354,9 @@ export const createPayrollRun = createAction({
     });
     revalidatePath(ROUTES.payroll);
     revalidatePath(ROUTES.payrollRuns);
+    revalidateTag("payroll-runs");
+    revalidateTag("payroll-dashboard");
+    revalidateTag("dashboard");
     return { id: run.id };
   },
 });
@@ -469,6 +475,9 @@ async function setRunStatus(
   revalidatePath(`${ROUTES.payrollRuns}/${runId}`);
   revalidatePath(ROUTES.payrollRuns);
   revalidatePath(ROUTES.payroll);
+  revalidateTag("payroll-runs");
+  revalidateTag("payroll-dashboard");
+  revalidateTag("dashboard");
 }
 
 export const submitPayrollRun = createAction({

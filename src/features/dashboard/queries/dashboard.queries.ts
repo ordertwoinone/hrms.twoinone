@@ -1,5 +1,6 @@
 import "server-only";
 
+import { unstable_cache } from "next/cache";
 import { format, addDays, startOfMonth, endOfMonth, subMonths } from "date-fns";
 
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -13,7 +14,7 @@ function isoDate(d: Date): string {
   return format(d, "yyyy-MM-dd");
 }
 
-export async function getDashboardData(): Promise<DashboardData> {
+async function fetchDashboardData(): Promise<DashboardData> {
   const admin = createAdminClient();
   const now = new Date();
   const today = isoDate(now);
@@ -21,31 +22,38 @@ export async function getDashboardData(): Promise<DashboardData> {
   const monthStart = isoDate(startOfMonth(now));
   const monthEnd = isoDate(endOfMonth(now));
 
-  // Run all independent queries in parallel
+  // All 18 independent queries run in one parallel batch — no sequential loops.
   const [
     empRows,
     leaveToday,
     newJoiners,
     resigned,
-    visaExp,
-    passExp,
-    insurExp,
-    contractExp,
-    eidExp,
-    lcExp,
+    visaCount,
+    passCount,
+    insurCount,
+    contractCount,
+    eidCount,
+    lcCount,
     deptRows,
     leaveCurrentRows,
     auditRows,
     payrollRow,
+    // Expiry alert detail queries (previously sequential — now parallel)
+    visaAlertRows,
+    passAlertRows,
+    eidAlertRows,
+    lcAlertRows,
   ] = await Promise.all([
     // All active employees (need full rows for distributions + birthdays)
     admin
       .from("employees")
-      .select("id, first_name, last_name, nationality, gender, date_of_birth, date_of_joining, date_of_leaving, department_id, departments:departments(name)")
+      .select(
+        "id, first_name, last_name, nationality, gender, date_of_birth, date_of_joining, date_of_leaving, department_id, departments:departments(name)",
+      )
       .is("deleted_at", null)
       .in("status", ["active", "probation", "on_leave"]),
 
-    // On leave today: approved leave requests where today is in range
+    // On leave today
     admin
       .from("leave_requests")
       .select("id", { count: "exact", head: true })
@@ -69,7 +77,7 @@ export async function getDashboardData(): Promise<DashboardData> {
       .gte("date_of_leaving", monthStart)
       .lte("date_of_leaving", monthEnd),
 
-    // Visa expiring in 30 days
+    // Visa expiring count
     admin
       .from("visas")
       .select("id", { count: "exact", head: true })
@@ -77,7 +85,7 @@ export async function getDashboardData(): Promise<DashboardData> {
       .gte("expiry_date", today)
       .lte("expiry_date", plus30),
 
-    // Passport expiring
+    // Passport expiring count
     admin
       .from("passports")
       .select("id", { count: "exact", head: true })
@@ -85,7 +93,7 @@ export async function getDashboardData(): Promise<DashboardData> {
       .gte("expiry_date", today)
       .lte("expiry_date", plus30),
 
-    // Medical insurance expiring
+    // Medical insurance expiring count
     admin
       .from("medical_insurance_policies")
       .select("id", { count: "exact", head: true })
@@ -93,7 +101,7 @@ export async function getDashboardData(): Promise<DashboardData> {
       .gte("end_date", today)
       .lte("end_date", plus30),
 
-    // Contract expiring
+    // Contract expiring count
     admin
       .from("contracts")
       .select("id", { count: "exact", head: true })
@@ -102,7 +110,7 @@ export async function getDashboardData(): Promise<DashboardData> {
       .gte("end_date", today)
       .lte("end_date", plus30),
 
-    // Emirates ID expiring
+    // Emirates ID expiring count
     admin
       .from("emirates_ids")
       .select("id", { count: "exact", head: true })
@@ -110,7 +118,7 @@ export async function getDashboardData(): Promise<DashboardData> {
       .gte("expiry_date", today)
       .lte("expiry_date", plus30),
 
-    // Labour card expiring
+    // Labour card expiring count
     admin
       .from("labour_cards")
       .select("id", { count: "exact", head: true })
@@ -129,7 +137,9 @@ export async function getDashboardData(): Promise<DashboardData> {
     // Current leave list (top 5)
     admin
       .from("leave_requests")
-      .select("employee:employees!leave_requests_employee_id_fkey(first_name, last_name), leave_type:leave_types(name), end_date")
+      .select(
+        "employee:employees!leave_requests_employee_id_fkey(first_name, last_name), leave_type:leave_types(name), end_date",
+      )
       .in("status", ["approved", "manager_approved"])
       .lte("start_date", today)
       .gte("end_date", today)
@@ -152,12 +162,51 @@ export async function getDashboardData(): Promise<DashboardData> {
       .order("period_month", { ascending: false })
       .limit(1)
       .maybeSingle(),
+
+    // Visa expiry alert details (top 3, previously in sequential loop)
+    admin
+      .from("visas")
+      .select("employee:employees!inner(first_name, last_name), expiry_date")
+      .is("deleted_at", null)
+      .gte("expiry_date", today)
+      .lte("expiry_date", plus30)
+      .order("expiry_date", { ascending: true })
+      .limit(3),
+
+    // Passport expiry alert details
+    admin
+      .from("passports")
+      .select("employee:employees!inner(first_name, last_name), expiry_date")
+      .is("deleted_at", null)
+      .gte("expiry_date", today)
+      .lte("expiry_date", plus30)
+      .order("expiry_date", { ascending: true })
+      .limit(3),
+
+    // Emirates ID expiry alert details
+    admin
+      .from("emirates_ids")
+      .select("employee:employees!inner(first_name, last_name), expiry_date")
+      .is("deleted_at", null)
+      .gte("expiry_date", today)
+      .lte("expiry_date", plus30)
+      .order("expiry_date", { ascending: true })
+      .limit(3),
+
+    // Labour card expiry alert details
+    admin
+      .from("labour_cards")
+      .select("employee:employees!inner(first_name, last_name), expiry_date")
+      .is("deleted_at", null)
+      .gte("expiry_date", today)
+      .lte("expiry_date", plus30)
+      .order("expiry_date", { ascending: true })
+      .limit(3),
   ]);
 
   const employees = empRows.data ?? [];
 
   // ── Distribution charts ──────────────────────────────────────────────────
-  // Department distribution
   const deptCount = new Map<string, number>();
   for (const r of deptRows.data ?? []) {
     const name =
@@ -171,7 +220,6 @@ export async function getDashboardData(): Promise<DashboardData> {
     .slice(0, 8)
     .map(([label, value]) => ({ label, value }));
 
-  // Nationality distribution (top 5 + Other)
   const natCount = new Map<string, number>();
   for (const e of employees) {
     const nat = e.nationality ?? "Unknown";
@@ -186,20 +234,16 @@ export async function getDashboardData(): Promise<DashboardData> {
         ]
       : natSorted.map(([label, value]) => ({ label, value }));
 
-  // Gender distribution
   const genderCount = new Map<string, number>();
   for (const e of employees) {
-    const g =
-      e.gender === "male"
-        ? "Male"
-        : e.gender === "female"
-          ? "Female"
-          : "Other";
+    const g = e.gender === "male" ? "Male" : e.gender === "female" ? "Female" : "Other";
     genderCount.set(g, (genderCount.get(g) ?? 0) + 1);
   }
-  const genderDistribution = [...genderCount.entries()].map(([label, value]) => ({ label, value }));
+  const genderDistribution = [...genderCount.entries()].map(([label, value]) => ({
+    label,
+    value,
+  }));
 
-  // Headcount trend: count of employees joining each of the last 6 months
   const headcountTrend = Array.from({ length: 6 }, (_, i) => {
     const month = subMonths(now, 5 - i);
     const label = format(month, "MMM");
@@ -223,56 +267,40 @@ export async function getDashboardData(): Promise<DashboardData> {
     if (thisBday < now) thisBday.setFullYear(now.getFullYear() + 1);
     const diff = Math.ceil((thisBday.getTime() - now.getTime()) / 86_400_000);
     if (diff >= 0 && diff <= 14) {
-      upcomingBirthdays.push({
-        name: `${e.first_name} ${e.last_name}`,
-        daysUntil: diff,
-      });
+      upcomingBirthdays.push({ name: `${e.first_name} ${e.last_name}`, daysUntil: diff });
     }
   }
   upcomingBirthdays.sort((a, b) => a.daysUntil - b.daysUntil);
 
-  // ── Expiry alerts list (top 6 total, soonest first) ─────────────────────
+  // ── Expiry alerts — built directly from parallel results ─────────────────
   const expiryAlerts: DashboardExpiryAlert[] = [];
-  const expiryEntities = [
-    { entity: "visa" as const, table: "visas" as const, dateCol: "expiry_date", nameCol: "visa_number" },
-    { entity: "passport" as const, table: "passports" as const, dateCol: "expiry_date", nameCol: "passport_number" },
-    { entity: "emirates_id" as const, table: "emirates_ids" as const, dateCol: "expiry_date", nameCol: "eid_number" },
-    { entity: "labour_card" as const, table: "labour_cards" as const, dateCol: "expiry_date", nameCol: "card_number" },
-  ] as const;
 
-  for (const { entity, table, dateCol } of expiryEntities) {
-    const { data: rows } = await admin
-      .from(table)
-      .select(`employee:employees!inner(first_name, last_name), ${dateCol}`)
-      .is("deleted_at", null)
-      .gte(dateCol, today)
-      .lte(dateCol, plus30)
-      .order(dateCol, { ascending: true })
-      .limit(3);
-
+  function addAlerts(
+    rows: { employee: unknown; expiry_date?: string | null }[] | null,
+    entity: DashboardExpiryAlert["entity"],
+    dateKey: string,
+  ) {
     for (const row of rows ?? []) {
       const emp = row.employee as { first_name: string; last_name: string } | null;
-      if (!emp) continue;
-      const expiryDate = row[dateCol as keyof typeof row] as string | null;
-      if (!expiryDate) continue;
+      const expiryDate = (row as Record<string, unknown>)[dateKey] as string | null;
+      if (!emp || !expiryDate) continue;
       const daysUntil = Math.ceil(
         (new Date(expiryDate).getTime() - now.getTime()) / 86_400_000,
       );
-      expiryAlerts.push({
-        name: `${emp.first_name} ${emp.last_name}`,
-        entity,
-        daysUntil,
-      });
+      expiryAlerts.push({ name: `${emp.first_name} ${emp.last_name}`, entity, daysUntil });
     }
   }
+
+  addAlerts(visaAlertRows.data as never, "visa", "expiry_date");
+  addAlerts(passAlertRows.data as never, "passport", "expiry_date");
+  addAlerts(eidAlertRows.data as never, "emirates_id", "expiry_date");
+  addAlerts(lcAlertRows.data as never, "labour_card", "expiry_date");
   expiryAlerts.sort((a, b) => a.daysUntil - b.daysUntil);
 
-  // ── Recent audit activity ────────────────────────────────────────────────
+  // ── Recent audit activity — resolve actor names ──────────────────────────
   const actorIds = [
     ...new Set(
-      (auditRows.data ?? [])
-        .map((r) => r.actor_id)
-        .filter((id): id is string => id != null),
+      (auditRows.data ?? []).map((r) => r.actor_id).filter((id): id is string => id != null),
     ),
   ];
   const profileMap = new Map<string, string>();
@@ -307,12 +335,12 @@ export async function getDashboardData(): Promise<DashboardData> {
     newJoinersThisMonth: newJoiners.count ?? 0,
     resignedThisMonth: resigned.count ?? 0,
 
-    visaExpiring30d: visaExp.count ?? 0,
-    passportExpiring30d: passExp.count ?? 0,
-    insuranceExpiring30d: insurExp.count ?? 0,
-    contractsExpiring30d: contractExp.count ?? 0,
-    emiratesIdExpiring30d: eidExp.count ?? 0,
-    labourCardExpiring30d: lcExp.count ?? 0,
+    visaExpiring30d: visaCount.count ?? 0,
+    passportExpiring30d: passCount.count ?? 0,
+    insuranceExpiring30d: insurCount.count ?? 0,
+    contractsExpiring30d: contractCount.count ?? 0,
+    emiratesIdExpiring30d: eidCount.count ?? 0,
+    labourCardExpiring30d: lcCount.count ?? 0,
 
     headcountTrend,
     departmentDistribution,
@@ -325,9 +353,17 @@ export async function getDashboardData(): Promise<DashboardData> {
     recentActivity,
 
     lastPayrollNet: payrollRow.data?.total_net ?? null,
-    lastPayrollMonth:
-      payrollRow.data
-        ? `${format(new Date(payrollRow.data.period_year, payrollRow.data.period_month - 1), "MMMM yyyy")}`
-        : null,
+    lastPayrollMonth: payrollRow.data
+      ? format(
+          new Date(payrollRow.data.period_year, payrollRow.data.period_month - 1),
+          "MMMM yyyy",
+        )
+      : null,
   };
 }
+
+// Cache dashboard data for 60 s — it's an overview, slight staleness is fine.
+export const getDashboardData = unstable_cache(fetchDashboardData, ["dashboard-data"], {
+  revalidate: 60,
+  tags: ["dashboard"],
+});

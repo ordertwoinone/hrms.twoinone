@@ -19,16 +19,18 @@ import { getPermissionsForRole } from "@/lib/auth/rbac";
 const loadUserProfile = unstable_cache(
   async (userId: string) => {
     const admin = createAdminClient();
-    const [profileResult, rolePermsResult, overridesResult] = await Promise.all([
+
+    // Two parallel queries: profile (with THIS role's permissions nested via FK join)
+    // + per-user overrides. This avoids fetching every role's permissions and filtering in JS.
+    const [profileResult, overridesResult] = await Promise.all([
       admin
         .from("profiles")
-        .select("id, email, full_name, avatar_url, status, role_id, role:roles(key)")
+        .select(
+          "id, email, full_name, avatar_url, status, role_id, role:roles(key, role_permissions(permission:permissions(key)))",
+        )
         .eq("id", userId)
         .is("deleted_at", null)
         .maybeSingle(),
-      admin
-        .from("role_permissions")
-        .select("permission:permissions(key), role_id"),
       admin
         .from("user_permissions")
         .select("granted, permission:permissions(key)")
@@ -38,12 +40,15 @@ const loadUserProfile = unstable_cache(
     const profile = profileResult.data;
     if (!profile || profile.status !== "active") return null;
 
-    const roleKey = profile.role?.key;
+    const roleKey = (profile.role as { key?: string } | null)?.key;
     const role: Role = roleKey && isRole(roleKey) ? roleKey : ROLES.EMPLOYEE;
 
-    const rolePerms = (rolePermsResult.data ?? []).filter(
-      (r) => r.role_id === profile.role_id,
-    );
+    type RoleWithPerms = {
+      key: string;
+      role_permissions: Array<{ permission: { key: string } | null }>;
+    };
+    const rolePerms =
+      (profile.role as RoleWithPerms | null)?.role_permissions ?? [];
     const overrides = overridesResult.data ?? [];
 
     const effective = new Set<string>();
@@ -51,7 +56,7 @@ const loadUserProfile = unstable_cache(
       if (row.permission?.key) effective.add(row.permission.key);
     }
     for (const row of overrides) {
-      const key = row.permission?.key;
+      const key = (row.permission as { key?: string } | null)?.key;
       if (!key) continue;
       if (row.granted) effective.add(key);
       else effective.delete(key);

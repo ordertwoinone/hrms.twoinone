@@ -1,5 +1,6 @@
 import "server-only";
 
+import { unstable_cache } from "next/cache";
 import { LOCALE } from "@/constants";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { MONTHS_SHORT, periodLabel } from "../constants";
@@ -66,21 +67,25 @@ export async function getOrgName(): Promise<string> {
   return data?.name ?? "Company";
 }
 
-export async function getPayrollFormOptions(): Promise<PayrollFormOptions> {
-  const admin = createAdminClient();
-  const { data } = await admin
-    .from("employees")
-    .select("id, first_name, last_name, employee_code")
-    .is("deleted_at", null)
-    .order("first_name");
-  return {
-    employees: (data ?? []).map((e) => ({
-      id: e.id,
-      name: `${e.first_name} ${e.last_name}`,
-      code: e.employee_code,
-    })),
-  };
-}
+export const getPayrollFormOptions = unstable_cache(
+  async (): Promise<PayrollFormOptions> => {
+    const admin = createAdminClient();
+    const { data } = await admin
+      .from("employees")
+      .select("id, first_name, last_name, employee_code")
+      .is("deleted_at", null)
+      .order("first_name");
+    return {
+      employees: (data ?? []).map((e) => ({
+        id: e.id,
+        name: `${e.first_name} ${e.last_name}`,
+        code: e.employee_code,
+      })),
+    };
+  },
+  ["payroll-form-options"],
+  { revalidate: 60, tags: ["employees", "payroll-options"] },
+);
 
 /** @deprecated Use salary.queries.getSalaryStructures instead. Kept for backward compat with payroll.actions. */
 export async function getSalaryStructures(): Promise<SalaryStructureItem[]> {
@@ -162,16 +167,22 @@ export async function getLoans(): Promise<LoanListItem[]> {
   }));
 }
 
-export async function getPayrollRuns(): Promise<PayrollRunListItem[]> {
-  const admin = createAdminClient();
-  const { data } = await admin
-    .from("payroll_runs")
-    .select("id, period_year, period_month, status, currency, total_gross, total_deductions, total_net, employee_count, approved_at, paid_at, locked_at, created_at")
-    .is("deleted_at", null)
-    .order("period_year", { ascending: false })
-    .order("period_month", { ascending: false });
-  return (data ?? []).map((r) => toRunListItem(r));
-}
+export const getPayrollRuns = unstable_cache(
+  async (): Promise<PayrollRunListItem[]> => {
+    const admin = createAdminClient();
+    const { data } = await admin
+      .from("payroll_runs")
+      .select(
+        "id, period_year, period_month, status, currency, total_gross, total_deductions, total_net, employee_count, approved_at, paid_at, locked_at, created_at",
+      )
+      .is("deleted_at", null)
+      .order("period_year", { ascending: false })
+      .order("period_month", { ascending: false });
+    return (data ?? []).map((r) => toRunListItem(r));
+  },
+  ["payroll-runs"],
+  { revalidate: 30, tags: ["payroll-runs"] },
+);
 
 export async function getPayrollRunById(
   id: string,
@@ -242,7 +253,7 @@ export async function getPayrollRunById(
   };
 }
 
-export async function getPayrollDashboard(): Promise<PayrollDashboardData> {
+async function fetchPayrollDashboard(): Promise<PayrollDashboardData> {
   const admin = createAdminClient();
   const now = new Date();
   const year = now.getFullYear();
@@ -315,6 +326,12 @@ export async function getPayrollDashboard(): Promise<PayrollDashboardData> {
     byMonthNet,
   };
 }
+
+export const getPayrollDashboard = unstable_cache(
+  fetchPayrollDashboard,
+  ["payroll-dashboard"],
+  { revalidate: 30, tags: ["payroll-dashboard", "payroll-runs"] },
+);
 
 /** Fetch attendance counts per employee for a period. Returns a Map of employeeId → {present, absent}. */
 export async function getAttendanceForPeriod(

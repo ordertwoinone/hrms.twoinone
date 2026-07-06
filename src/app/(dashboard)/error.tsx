@@ -18,12 +18,17 @@ export default function DashboardError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  // Next.js redirect() throws NEXT_REDIRECT — re-throw so the router handles it.
+  if (error.digest?.startsWith("NEXT_REDIRECT")) throw error;
+
   React.useEffect(() => {
     logger.error("Dashboard error boundary", {
       message: error.message,
       digest: error.digest,
     });
   }, [error]);
+
+  const isDev = process.env.NODE_ENV === "development";
 
   return (
     <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 text-center">
@@ -35,6 +40,12 @@ export default function DashboardError({
         <p className="max-w-md text-sm text-muted-foreground">
           An error occurred while loading this section. Please try again.
         </p>
+        {isDev && (
+          <pre className="mt-2 max-w-xl overflow-auto rounded bg-muted px-3 py-2 text-left text-xs text-destructive">
+            {error.message || "(no message)"}
+            {error.digest ? `\ndigest: ${error.digest}` : ""}
+          </pre>
+        )}
       </div>
       <Button onClick={reset}>Try again</Button>
     </div>
