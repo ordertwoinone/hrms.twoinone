@@ -1,4 +1,4 @@
-﻿export type Json =
+export type Json =
   | string
   | number
   | boolean
@@ -268,6 +268,75 @@ export type Database = {
           },
           {
             foreignKeyName: "attendance_corrections_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      attendance_monthly_summary: {
+        Row: {
+          absent_days: number
+          absent_deduction: number
+          additional_duty_hours: number
+          additional_duty_payment: number
+          company_id: string
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          employee_id: string
+          id: string
+          notes: string | null
+          period_month: number
+          period_year: number
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          absent_days?: number
+          absent_deduction?: number
+          additional_duty_hours?: number
+          additional_duty_payment?: number
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          employee_id: string
+          id?: string
+          notes?: string | null
+          period_month: number
+          period_year: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          absent_days?: number
+          absent_deduction?: number
+          additional_duty_hours?: number
+          additional_duty_payment?: number
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          employee_id?: string
+          id?: string
+          notes?: string | null
+          period_month?: number
+          period_year?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_monthly_summary_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_monthly_summary_employee_id_fkey"
             columns: ["employee_id"]
             isOneToOne: false
             referencedRelation: "employees"

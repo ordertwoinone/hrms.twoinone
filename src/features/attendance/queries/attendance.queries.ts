@@ -5,6 +5,7 @@ import type {
   AttendanceFormOptions,
   AttendanceListItem,
   AttendanceSummary,
+  MonthlyAttendanceSummaryItem,
   ShiftItem,
 } from "../types";
 
@@ -120,6 +121,39 @@ export async function getShifts(): Promise<ShiftItem[]> {
     graceMinutes: s.grace_minutes,
     status: s.status,
     employeeCount: 0,
+  }));
+}
+
+export async function getMonthlyAttendanceSummaries(
+  month: string,
+): Promise<MonthlyAttendanceSummaryItem[]> {
+  const admin = createAdminClient();
+  const [year, mo] = month.split("-").map(Number);
+
+  const { data, error } = await admin
+    .from("attendance_monthly_summary")
+    .select(
+      "id, employee_id, period_year, period_month, absent_days, absent_deduction, additional_duty_hours, additional_duty_payment, notes, updated_at, employee:employees!attendance_monthly_summary_employee_id_fkey(first_name, last_name, employee_code)",
+    )
+    .eq("period_year", year!)
+    .eq("period_month", mo!)
+    .is("deleted_at", null)
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+
+  return (data ?? []).map((row) => ({
+    id: row.id,
+    employeeId: row.employee_id,
+    employeeName: row.employee ? `${row.employee.first_name} ${row.employee.last_name}` : "—",
+    employeeCode: row.employee?.employee_code ?? "—",
+    periodYear: row.period_year,
+    periodMonth: row.period_month,
+    absentDays: Number(row.absent_days),
+    absentDeduction: Number(row.absent_deduction),
+    additionalDutyHours: Number(row.additional_duty_hours),
+    additionalDutyPayment: Number(row.additional_duty_payment),
+    notes: row.notes,
+    updatedAt: row.updated_at,
   }));
 }
 

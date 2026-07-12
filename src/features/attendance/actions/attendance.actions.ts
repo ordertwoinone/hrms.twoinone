@@ -4,7 +4,11 @@ import { z } from "zod";
 
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
+import { createAction, ActionError } from "@/server/safe-action";
 import { recordAudit } from "@/server/audit";
+import { PERMISSIONS } from "@/constants/permissions";
+import { revalidatePath } from "next/cache";
+import { ROUTES } from "@/constants/routes";
 import type { ActionResult } from "@/types/common";
 
 const EntrySchema = z.object({
@@ -134,3 +138,92 @@ export async function upsertShift(input: {
     return { success: true, data: { id: data.id } };
   }
 }
+
+const MonthlySummarySchema = z.object({
+  employeeId: z.string().uuid(),
+  periodYear: z.coerce.number().int().min(2000).max(2100),
+  periodMonth: z.coerce.number().int().min(1).max(12),
+  absentDays: z.coerce.number().min(0),
+  absentDeduction: z.coerce.number().min(0),
+  additionalDutyHours: z.coerce.number().min(0),
+  additionalDutyPayment: z.coerce.number().min(0),
+  notes: z.string().max(500).nullable().optional(),
+});
+
+export const upsertMonthlyAttendance = createAction({
+  input: MonthlySummarySchema,
+  permission: PERMISSIONS.ATTENDANCE_MANAGE,
+  handler: async ({ input, user }) => {
+    const admin = createAdminClient();
+
+    const { data: emp } = await admin
+      .from("employees")
+      .select("company_id")
+      .eq("id", input.employeeId)
+      .is("deleted_at", null)
+      .maybeSingle();
+    if (!emp) throw new ActionError("Employee not found");
+
+    const { data: existing } = await admin
+      .from("attendance_monthly_summary")
+      .select("id")
+      .eq("employee_id", input.employeeId)
+      .eq("period_year", input.periodYear)
+      .eq("period_month", input.periodMonth)
+      .is("deleted_at", null)
+      .maybeSingle();
+
+    const payload = {
+      employee_id: input.employeeId,
+      company_id: emp.company_id,
+      period_year: input.periodYear,
+      period_month: input.periodMonth,
+      absent_days: input.absentDays,
+      absent_deduction: input.absentDeduction,
+      additional_duty_hours: input.additionalDutyHours,
+      additional_duty_payment: input.additionalDutyPayment,
+      notes: input.notes ?? null,
+      updated_by: user.id,
+    };
+
+    let id: string;
+    if (existing) {
+      const { error } = await admin
+        .from("attendance_monthly_summary")
+        .update(payload)
+        .eq("id", existing.id);
+      if (error) throw new ActionError(error.message);
+      id = existing.id;
+      await recordAudit({ actorId: user.id, action: "update", entity: "attendance_monthly_summary", entityId: id });
+    } else {
+      const { data, error } = await admin
+        .from("attendance_monthly_summary")
+        .insert({ ...payload, created_by: user.id })
+        .select("id")
+        .single();
+      if (error) throw new ActionError(error.message);
+      id = data.id;
+      await recordAudit({ actorId: user.id, action: "create", entity: "attendance_monthly_summary", entityId: id });
+    }
+
+    revalidatePath(ROUTES.attendance);
+    return { id };
+  },
+});
+
+export const deleteMonthlyAttendance = createAction({
+  input: z.object({ id: z.string().uuid() }),
+  permission: PERMISSIONS.ATTENDANCE_MANAGE,
+  handler: async ({ input, user }) => {
+    const admin = createAdminClient();
+    const { error } = await admin
+      .from("attendance_monthly_summary")
+      .update({ deleted_at: new Date().toISOString(), updated_by: user.id })
+      .eq("id", input.id)
+      .is("deleted_at", null);
+    if (error) throw new ActionError(error.message);
+    await recordAudit({ actorId: user.id, action: "delete", entity: "attendance_monthly_summary", entityId: input.id });
+    revalidatePath(ROUTES.attendance);
+    return { ok: true };
+  },
+});

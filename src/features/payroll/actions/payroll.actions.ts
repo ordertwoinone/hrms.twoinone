@@ -18,6 +18,7 @@ import {
   getSalaryStructures,
   getAttendanceForPeriod,
   getOvertimeForPeriod,
+  getMonthlyAttendanceOverridesForPeriod,
 } from "../queries/payroll.queries";
 import { getActiveAdvancesForPayroll } from "../queries/advances.queries";
 import { getApprovedBonusesForPeriod } from "../queries/bonuses.queries";
@@ -203,7 +204,7 @@ export const createPayrollRun = createAction({
     const workingDays = workingDaysInMonth(input.period_year, input.period_month);
 
     // Fetch all integration data in parallel
-    const [loanData, advanceData, bonusData, attendanceMap, overtimeMap] =
+    const [loanData, advanceData, bonusData, attendanceMap, overtimeMap, overrideMap] =
       await Promise.all([
         admin
           .from("employee_loans")
@@ -214,6 +215,7 @@ export const createPayrollRun = createAction({
         getApprovedBonusesForPeriod(input.period_year, input.period_month),
         getAttendanceForPeriod(input.period_year, input.period_month),
         getOvertimeForPeriod(input.period_year, input.period_month),
+        getMonthlyAttendanceOverridesForPeriod(input.period_year, input.period_month),
       ]);
 
     // Build per-employee deduction maps
@@ -261,13 +263,17 @@ export const createPayrollRun = createAction({
     const rows = structures.map((s) => {
       const att = attendanceMap.get(s.employeeId);
       const ot = overtimeMap.get(s.employeeId);
+      const override = overrideMap.get(s.employeeId);
       const presentDays = att?.present ?? workingDays;
-      const absentDays = att?.absent ?? 0;
+      const absentDays = override?.absentDays ?? att?.absent ?? 0;
 
-      // OT amount = (basic / working_days) * ot_rate * ot_hours
+      // OT amount = (basic / working_days) * ot_rate * ot_hours, unless a
+      // manual monthly attendance override sets the duty hours/payment directly.
       const dailyBasic = workingDays > 0 ? s.basic / workingDays : 0;
-      const otHours = ot?.hours ?? 0;
-      const otAmount = round2(dailyBasic * s.overtimeRateMultiplier * otHours);
+      const otHours = override?.dutyHours ?? ot?.hours ?? 0;
+      const otAmount = override
+        ? round2(override.dutyPayment)
+        : round2(dailyBasic * s.overtimeRateMultiplier * otHours);
 
       const loanDed = round2(loanByEmp.get(s.employeeId) ?? 0);
       const advanceDed = round2(advanceByEmp.get(s.employeeId)?.total ?? 0);
@@ -292,6 +298,7 @@ export const createPayrollRun = createAction({
         ssEmployeePct: s.ssEmployeePct,
         absentDays,
         workingDays,
+        absentDeductionOverride: override?.absentDeduction,
       });
 
       const ssEmployer = round2(gross * s.ssEmployerPct);

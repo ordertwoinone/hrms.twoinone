@@ -103,6 +103,8 @@ export interface PayslipComponents {
   ssEmployeePct: number;
   absentDays: number;
   workingDays: number;
+  /** When provided, used directly instead of dailyBasicRate * absentDays. */
+  absentDeductionOverride?: number;
 }
 
 /**
@@ -120,7 +122,10 @@ export function computePayslip(c: PayslipComponents): {
     c.workingDays > 0
       ? round2((c.basic + c.housing + c.transport + c.food + c.telephone) / c.workingDays)
       : 0;
-  const absentDeduction = round2(dailyBasicRate * c.absentDays);
+  const absentDeduction =
+    c.absentDeductionOverride !== undefined
+      ? round2(c.absentDeductionOverride)
+      : round2(dailyBasicRate * c.absentDays);
 
   const gross = round2(
     c.basic +

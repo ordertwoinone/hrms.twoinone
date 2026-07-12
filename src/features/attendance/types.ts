@@ -58,3 +58,20 @@ export interface AttendanceFormOptions {
   employees: { id: string; name: string; code: string }[];
   shifts: { id: string; name: string }[];
 }
+
+export type AttendanceMonthlySummaryRow = Tbl["attendance_monthly_summary"]["Row"];
+
+export interface MonthlyAttendanceSummaryItem {
+  id: string;
+  employeeId: string;
+  employeeName: string;
+  employeeCode: string;
+  periodYear: number;
+  periodMonth: number;
+  absentDays: number;
+  absentDeduction: number;
+  additionalDutyHours: number;
+  additionalDutyPayment: number;
+  notes: string | null;
+  updatedAt: string;
+}

@@ -362,6 +362,36 @@ export async function getAttendanceForPeriod(
   return map;
 }
 
+/**
+ * Fetch manual monthly attendance overrides per employee for a period.
+ * When a row exists for an employee, payroll uses its absent deduction and
+ * additional duty (OT) figures directly instead of the auto-computed formula.
+ */
+export async function getMonthlyAttendanceOverridesForPeriod(
+  year: number,
+  month: number,
+): Promise<Map<string, { absentDays: number; absentDeduction: number; dutyHours: number; dutyPayment: number }>> {
+  const admin = createAdminClient();
+
+  const { data } = await admin
+    .from("attendance_monthly_summary")
+    .select("employee_id, absent_days, absent_deduction, additional_duty_hours, additional_duty_payment")
+    .eq("period_year", year)
+    .eq("period_month", month)
+    .is("deleted_at", null);
+
+  const map = new Map<string, { absentDays: number; absentDeduction: number; dutyHours: number; dutyPayment: number }>();
+  for (const row of data ?? []) {
+    map.set(row.employee_id, {
+      absentDays: num(row.absent_days),
+      absentDeduction: num(row.absent_deduction),
+      dutyHours: num(row.additional_duty_hours),
+      dutyPayment: num(row.additional_duty_payment),
+    });
+  }
+  return map;
+}
+
 /** Fetch approved overtime hours/amount per employee for a period. */
 export async function getOvertimeForPeriod(
   year: number,

@@ -9,6 +9,7 @@ import {
   getAttendanceLogs,
   computeAttendanceSummary,
   getAttendanceFormOptions,
+  getMonthlyAttendanceSummaries,
 } from "@/features/attendance/queries/attendance.queries";
 
 export const metadata: Metadata = { title: "Attendance" };
@@ -23,9 +24,10 @@ export default async function AttendancePage({ searchParams }: PageProps) {
 
   const currentMonth = params.month ?? new Date().toISOString().slice(0, 7);
 
-  const [rows, options] = await Promise.all([
+  const [rows, options, monthlySummaries] = await Promise.all([
     getAttendanceLogs({ month: currentMonth }),
     getAttendanceFormOptions(),
+    getMonthlyAttendanceSummaries(currentMonth),
   ]);
   const summary = computeAttendanceSummary(rows);
 
@@ -41,6 +43,7 @@ export default async function AttendancePage({ searchParams }: PageProps) {
         rows={rows}
         summary={summary}
         options={options}
+        monthlySummaries={monthlySummaries}
         currentMonth={currentMonth}
         canManage={canManage}
       />
